@@ -48,11 +48,11 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
           ],
           agentConfig: {
             name: 'Customer Support Agent',
-            description: 'Friendly and helpful customer support agent',
+            description: 'Friendly and helpful customer support agent that provides excellent customer service',
             type: 'llm',
-            persona: 'You are a helpful and empathetic customer support agent. You provide clear, accurate information and always maintain a professional yet friendly tone.',
-            primaryObjective: 'Assist customers with their inquiries and provide excellent support experience',
-            tools: ['web-search', 'email-sender'],
+            persona: 'You are a helpful and empathetic customer support agent. You provide clear, accurate information and always maintain a professional yet friendly tone. You listen carefully to customer concerns and provide solutions or escalate when necessary.',
+            primaryObjective: 'Assist customers with their inquiries and provide excellent support experience while maintaining high satisfaction levels',
+            tools: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'], // Web Search, Email Sender
             workflow: {
               nodes: [
                 {
@@ -69,7 +69,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                     label: 'Analyze Intent',
                     config: {
                       model: 'gpt-3.5-turbo',
-                      systemPrompt: 'Analyze the customer inquiry and categorize the intent: question, complaint, request, or compliment.',
+                      systemPrompt: 'Analyze the customer inquiry and categorize the intent as: question, complaint, request, compliment, or urgent. Also determine the sentiment and urgency level.',
                       temperature: 0.3
                     }
                   }
@@ -81,9 +81,20 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                   data: {
                     label: 'Search Knowledge Base',
                     config: {
-                      toolId: 'web-search',
+                      toolId: '550e8400-e29b-41d4-a716-446655440001',
+                      toolName: 'Web Search',
+                      toolType: 'ai',
+                      parameters: [
+                        {
+                          id: 'query',
+                          name: 'query',
+                          type: 'string',
+                          required: true,
+                          description: 'The search query'
+                        }
+                      ],
                       parameterValues: {
-                        query: '{{intent-analysis.output}}'
+                        query: '{{input.message}} customer support help'
                       }
                     }
                   }
@@ -96,7 +107,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                     label: 'Generate Response',
                     config: {
                       model: 'gpt-3.5-turbo',
-                      systemPrompt: 'Generate a helpful customer support response based on the knowledge base results.',
+                      systemPrompt: 'Generate a helpful, empathetic customer support response based on the intent analysis and knowledge base results. Be professional, friendly, and solution-oriented.',
                       temperature: 0.7
                     }
                   }
@@ -176,11 +187,11 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
           ],
           agentConfig: {
             name: 'Content Writer Agent',
-            description: 'Creative and strategic content writer',
+            description: 'Creative and strategic content writer that produces engaging, high-quality content',
             type: 'llm',
-            persona: 'You are a skilled content writer with expertise in creating engaging, informative, and SEO-optimized content across various formats and industries.',
-            primaryObjective: 'Create high-quality, engaging content that meets specific requirements and brand guidelines',
-            tools: ['web-search', 'http-request'],
+            persona: 'You are a skilled content writer with expertise in creating engaging, informative, and SEO-optimized content across various formats and industries. You understand brand voice, target audiences, and content strategy.',
+            primaryObjective: 'Create high-quality, engaging content that meets specific requirements, follows brand guidelines, and achieves marketing objectives',
+            tools: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440003'], // Web Search, HTTP Request
             workflow: {
               nodes: [
                 {
@@ -196,9 +207,20 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                   data: {
                     label: 'Research Topic',
                     config: {
-                      toolId: 'web-search',
+                      toolId: '550e8400-e29b-41d4-a716-446655440001',
+                      toolName: 'Web Search',
+                      toolType: 'ai',
+                      parameters: [
+                        {
+                          id: 'query',
+                          name: 'query',
+                          type: 'string',
+                          required: true,
+                          description: 'The search query'
+                        }
+                      ],
                       parameterValues: {
-                        query: '{{input.topic}}'
+                        query: '{{input.topic}} latest trends research'
                       }
                     }
                   }
@@ -211,7 +233,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                     label: 'Create Outline',
                     config: {
                       model: 'gpt-4',
-                      systemPrompt: 'Create a detailed content outline based on the research and requirements.',
+                      systemPrompt: 'Create a detailed content outline based on the research and requirements. Include main points, subheadings, and key messages.',
                       temperature: 0.7
                     }
                   }
@@ -224,7 +246,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                     label: 'Write Content',
                     config: {
                       model: 'gpt-4',
-                      systemPrompt: 'Write engaging, high-quality content based on the outline and research.',
+                      systemPrompt: 'Write engaging, high-quality content based on the outline and research. Follow the specified tone, style, and format requirements.',
                       temperature: 0.8
                     }
                   }
@@ -304,11 +326,11 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
           ],
           agentConfig: {
             name: 'Data Analyst Agent',
-            description: 'Expert data analyst and insights generator',
+            description: 'Expert data analyst that uncovers insights and generates comprehensive reports',
             type: 'hybrid',
-            persona: 'You are an experienced data analyst who excels at finding meaningful insights in data and presenting them in clear, actionable ways.',
-            primaryObjective: 'Analyze data to uncover insights and generate comprehensive reports',
-            tools: ['http-request', 'web-search'],
+            persona: 'You are an experienced data analyst who excels at finding meaningful insights in data and presenting them in clear, actionable ways. You understand statistical concepts and can communicate complex findings to non-technical audiences.',
+            primaryObjective: 'Analyze data to uncover insights, identify trends, and generate comprehensive reports that drive business decisions',
+            tools: ['550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440001'], // HTTP Request, Web Search
             workflow: {
               nodes: [
                 {
@@ -324,10 +346,28 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                   data: {
                     label: 'Fetch Data',
                     config: {
-                      toolId: 'http-request',
+                      toolId: '550e8400-e29b-41d4-a716-446655440003',
+                      toolName: 'HTTP Request',
+                      toolType: 'api',
+                      parameters: [
+                        {
+                          id: 'url',
+                          name: 'url',
+                          type: 'string',
+                          required: true,
+                          description: 'The URL to make the request to'
+                        },
+                        {
+                          id: 'headers',
+                          name: 'headers',
+                          type: 'object',
+                          required: false,
+                          description: 'Request headers'
+                        }
+                      ],
                       parameterValues: {
                         url: '{{input.dataSource}}',
-                        method: 'GET'
+                        headers: '{{input.headers}}'
                       }
                     }
                   }
@@ -340,7 +380,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                     label: 'Analyze Data',
                     config: {
                       model: 'gpt-4',
-                      systemPrompt: 'Analyze the provided data and identify key trends, patterns, and insights.',
+                      systemPrompt: 'Analyze the provided data and identify key trends, patterns, anomalies, and insights. Perform statistical analysis where appropriate.',
                       temperature: 0.3
                     }
                   }
@@ -353,7 +393,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                     label: 'Generate Report',
                     config: {
                       model: 'gpt-4',
-                      systemPrompt: 'Create a comprehensive data analysis report with insights and recommendations.',
+                      systemPrompt: 'Create a comprehensive data analysis report with insights, recommendations, and actionable next steps. Include executive summary and detailed findings.',
                       temperature: 0.5
                     }
                   }
@@ -459,19 +499,20 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                   label: 'Classify Email',
                   config: {
                     model: 'gpt-3.5-turbo',
-                    systemPrompt: 'Classify the email as: urgent, normal, spam, or inquiry',
+                    systemPrompt: 'Classify the email as: urgent, normal, spam, or inquiry. Also determine the appropriate response type.',
                     temperature: 0.2
                   }
                 }
               },
               {
                 id: 'route',
-                type: 'condition',
+                type: 'rule',
                 position: { x: 500, y: 100 },
                 data: {
                   label: 'Route Email',
                   config: {
-                    condition: 'classification === "urgent"'
+                    condition: 'input.contains("urgent")',
+                    action: 'continue'
                   }
                 }
               },
@@ -482,7 +523,37 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                 data: {
                   label: 'Send Auto Reply',
                   config: {
-                    toolId: 'email-sender'
+                    toolId: '550e8400-e29b-41d4-a716-446655440002',
+                    toolName: 'Email Sender',
+                    toolType: 'email',
+                    parameters: [
+                      {
+                        id: 'to',
+                        name: 'to',
+                        type: 'string',
+                        required: true,
+                        description: 'Recipient email address'
+                      },
+                      {
+                        id: 'subject',
+                        name: 'subject',
+                        type: 'string',
+                        required: true,
+                        description: 'Email subject'
+                      },
+                      {
+                        id: 'body',
+                        name: 'body',
+                        type: 'string',
+                        required: true,
+                        description: 'Email body content'
+                      }
+                    ],
+                    parameterValues: {
+                      to: '{{input.from}}',
+                      subject: 'Re: {{input.subject}}',
+                      body: 'Thank you for your email. We have received your message and will respond shortly.'
+                    }
                   }
                 }
               },
@@ -493,7 +564,37 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                 data: {
                   label: 'Escalate to Human',
                   config: {
-                    toolId: 'email-sender'
+                    toolId: '550e8400-e29b-41d4-a716-446655440002',
+                    toolName: 'Email Sender',
+                    toolType: 'email',
+                    parameters: [
+                      {
+                        id: 'to',
+                        name: 'to',
+                        type: 'string',
+                        required: true,
+                        description: 'Recipient email address'
+                      },
+                      {
+                        id: 'subject',
+                        name: 'subject',
+                        type: 'string',
+                        required: true,
+                        description: 'Email subject'
+                      },
+                      {
+                        id: 'body',
+                        name: 'body',
+                        type: 'string',
+                        required: true,
+                        description: 'Email body content'
+                      }
+                    ],
+                    parameterValues: {
+                      to: 'support@company.com',
+                      subject: 'URGENT: {{input.subject}}',
+                      body: 'Urgent email requires human attention: {{input.body}}'
+                    }
                   }
                 }
               },
@@ -519,7 +620,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
               logging: true
             }
           },
-          requiredTools: ['email-sender'],
+          requiredTools: ['550e8400-e29b-41d4-a716-446655440002'], // Email Sender
           inputSchema: {
             type: 'object',
             properties: {
@@ -581,7 +682,21 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                 data: {
                   label: 'Research Topic',
                   config: {
-                    toolId: 'web-search'
+                    toolId: '550e8400-e29b-41d4-a716-446655440001',
+                    toolName: 'Web Search',
+                    toolType: 'ai',
+                    parameters: [
+                      {
+                        id: 'query',
+                        name: 'query',
+                        type: 'string',
+                        required: true,
+                        description: 'The search query'
+                      }
+                    ],
+                    parameterValues: {
+                      query: '{{input.topic}} latest trends 2025'
+                    }
                   }
                 }
               },
@@ -593,7 +708,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                   label: 'Create Outline',
                   config: {
                     model: 'gpt-4',
-                    systemPrompt: 'Create a detailed content outline',
+                    systemPrompt: 'Create a detailed content outline based on the research and target audience. Include main sections, key points, and SEO considerations.',
                     temperature: 0.7
                   }
                 }
@@ -606,7 +721,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                   label: 'Write Content',
                   config: {
                     model: 'gpt-4',
-                    systemPrompt: 'Write engaging content based on the outline',
+                    systemPrompt: 'Write engaging, high-quality content based on the outline. Match the specified tone and target the intended audience.',
                     temperature: 0.8
                   }
                 }
@@ -619,7 +734,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
                   label: 'SEO Optimize',
                   config: {
                     model: 'gpt-3.5-turbo',
-                    systemPrompt: 'Optimize content for SEO',
+                    systemPrompt: 'Optimize the content for SEO by adding meta descriptions, improving keyword density, and suggesting internal links.',
                     temperature: 0.5
                   }
                 }
@@ -645,7 +760,7 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
               logging: true
             }
           },
-          requiredTools: ['web-search'],
+          requiredTools: ['550e8400-e29b-41d4-a716-446655440001'], // Web Search
           inputSchema: {
             type: 'object',
             properties: {
@@ -707,7 +822,8 @@ export const useTemplateStore = create<TemplateStore>((set, get) => ({
     }
 
     // Import agent store to create the agent
-    const { createAgent } = await import('./agentStore')
+    const { useAgentStore } = await import('./agentStore')
+    const { createAgent } = useAgentStore.getState()
     
     const agentData = {
       ...template.agentConfig,

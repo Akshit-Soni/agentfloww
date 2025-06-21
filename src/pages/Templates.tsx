@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
+import { TemplatePreviewModal } from '@/components/templates/TemplatePreviewModal'
 import { useTemplateStore } from '@/store/templateStore'
 import { useToast } from '@/components/ui/Toast'
 import { AgentTemplate, WorkflowTemplate, TemplateCategory } from '@/types/template'
@@ -74,7 +75,13 @@ export function Templates() {
       } else {
         // Workflow template - redirect to workflow builder with template
         navigate(`/builder?template=${template.id}`)
+        addToast({
+          type: 'success',
+          title: 'Template Loaded',
+          description: `Workflow template "${template.name}" has been loaded in the builder.`
+        })
       }
+      setSelectedTemplate(null)
     } catch (error) {
       addToast({
         type: 'error',
@@ -424,6 +431,15 @@ export function Templates() {
             </Button>
           </div>
         )
+      )}
+
+      {/* Template Preview Modal */}
+      {selectedTemplate && (
+        <TemplatePreviewModal
+          template={selectedTemplate}
+          onClose={() => setSelectedTemplate(null)}
+          onUse={handleUseTemplate}
+        />
       )}
     </div>
   )
