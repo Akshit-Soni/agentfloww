@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
 import { useToolStore } from '@/store/toolStore'
+import { useToast } from '@/components/ui/Toast'
 import { Tool, ToolParameter, ToolAuthentication } from '@/types/tool'
 
 export function ToolBuilder() {
   const { toolId } = useParams()
   const navigate = useNavigate()
   const { tools, createTool, updateTool, testTool, isLoading } = useToolStore()
+  const { addToast } = useToast()
   const [isEditing, setIsEditing] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
   const [testInput, setTestInput] = useState<Record<string, any>>({})
@@ -60,24 +62,54 @@ export function ToolBuilder() {
     try {
       if (isEditing && toolId) {
         await updateTool(toolId, formData)
+        addToast({
+          type: 'success',
+          title: 'Tool Updated',
+          description: 'Tool has been successfully updated.'
+        })
       } else {
         await createTool(formData)
+        addToast({
+          type: 'success',
+          title: 'Tool Created',
+          description: 'Tool has been successfully created.'
+        })
       }
       navigate('/tools')
     } catch (error) {
-      console.error('Failed to save tool:', error)
+      addToast({
+        type: 'error',
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to save tool'
+      })
     }
   }
 
   const handleTest = async () => {
-    if (!toolId && !isEditing) return
+    if (!toolId && !isEditing) {
+      addToast({
+        type: 'error',
+        title: 'Cannot Test',
+        description: 'Please save the tool first before testing.'
+      })
+      return
+    }
     
     setIsTesting(true)
     try {
       const result = await testTool(toolId || 'new-tool', testInput)
       setTestResult(result)
+      addToast({
+        type: 'success',
+        title: 'Test Complete',
+        description: 'Tool test executed successfully.'
+      })
     } catch (error) {
-      console.error('Test failed:', error)
+      addToast({
+        type: 'error',
+        title: 'Test Failed',
+        description: error instanceof Error ? error.message : 'Tool test failed'
+      })
     } finally {
       setIsTesting(false)
     }

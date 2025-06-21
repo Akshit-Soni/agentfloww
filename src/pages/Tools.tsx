@@ -22,12 +22,14 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
 import { useToolStore } from '@/store/toolStore'
+import { useToast } from '@/components/ui/Toast'
 import { formatDate } from '@/lib/utils'
 import { Tool, ToolType, ToolCategory } from '@/types/tool'
 
 export function Tools() {
   const navigate = useNavigate()
   const { tools, fetchTools, deleteTool, testTool, isLoading } = useToolStore()
+  const { addToast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterType, setFilterType] = useState<string>('all')
@@ -47,7 +49,20 @@ export function Tools() {
 
   const handleDeleteTool = async (toolId: string) => {
     if (window.confirm('Are you sure you want to delete this tool?')) {
-      await deleteTool(toolId)
+      try {
+        await deleteTool(toolId)
+        addToast({
+          type: 'success',
+          title: 'Tool Deleted',
+          description: 'Tool has been successfully deleted.'
+        })
+      } catch (error) {
+        addToast({
+          type: 'error',
+          title: 'Delete Failed',
+          description: error instanceof Error ? error.message : 'Failed to delete tool'
+        })
+      }
     }
   }
 
@@ -55,27 +70,49 @@ export function Tools() {
     const tool = tools.find(t => t.id === toolId)
     if (!tool) return
 
-    // Create mock input based on tool parameters
-    const mockInput: Record<string, any> = {}
-    tool.config.parameters.forEach(param => {
-      if (param.required) {
-        switch (param.type) {
-          case 'string':
-            mockInput[param.name] = 'test value'
-            break
-          case 'number':
-            mockInput[param.name] = 123
-            break
-          case 'boolean':
-            mockInput[param.name] = true
-            break
-          default:
-            mockInput[param.name] = 'test'
+    try {
+      // Create mock input based on tool parameters
+      const mockInput: Record<string, any> = {}
+      tool.config.parameters.forEach(param => {
+        if (param.required) {
+          switch (param.type) {
+            case 'string':
+              mockInput[param.name] = param.name === 'url' ? 'https://api.example.com/test' : 'test value'
+              break
+            case 'number':
+              mockInput[param.name] = 123
+              break
+            case 'boolean':
+              mockInput[param.name] = true
+              break
+            default:
+              mockInput[param.name] = 'test'
+          }
         }
-      }
-    })
+      })
 
-    await testTool(toolId, mockInput)
+      await testTool(toolId, mockInput)
+      addToast({
+        type: 'success',
+        title: 'Tool Test Complete',
+        description: `Tool "${tool.name}" executed successfully.`
+      })
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Tool Test Failed',
+        description: error instanceof Error ? error.message : 'Failed to test tool'
+      })
+    }
+  }
+
+  const handleCopyId = (toolId: string) => {
+    navigator.clipboard.writeText(toolId)
+    addToast({
+      type: 'success',
+      title: 'Copied',
+      description: 'Tool ID copied to clipboard.'
+    })
   }
 
   const getTypeIcon = (type: ToolType) => {
@@ -122,7 +159,7 @@ export function Tools() {
             Create and manage custom tools for your AI agents
           </p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2">
+        <Button onClick={() => navigate('/tools/new')} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Create Tool
         </Button>
@@ -252,7 +289,7 @@ export function Tools() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigator.clipboard.writeText(tool.id)}
+                      onClick={() => handleCopyId(tool.id)}
                     >
                       <Copy className="w-3 h-3" />
                     </Button>
@@ -284,160 +321,12 @@ export function Tools() {
               : 'Create your first custom tool to extend your agents capabilities'
             }
           </p>
-          <Button onClick={() => setShowCreateModal(true)}>
+          <Button onClick={() => navigate('/tools/new')}>
             <Plus className="w-4 h-4 mr-2" />
             Create Tool
           </Button>
         </div>
       )}
-
-      {/* Create Tool Modal */}
-      {showCreateModal && (
-        <CreateToolModal 
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
-            setShowCreateModal(false)
-            fetchTools()
-          }}
-        />
-      )}
-    </div>
-  )
-}
-
-// Create Tool Modal Component
-function CreateToolModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
-  const { createTool } = useToolStore()
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    type: 'api' as ToolType,
-    category: 'integration' as ToolCategory,
-    endpoint: '',
-    method: 'GET' as const,
-    parameters: [] as any[]
-  })
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
-      await createTool({
-        name: formData.name,
-        description: formData.description,
-        type: formData.type,
-        category: formData.category,
-        config: {
-          endpoint: formData.endpoint,
-          method: formData.method,
-          parameters: formData.parameters
-        }
-      })
-      onSuccess()
-    } catch (error) {
-      console.error('Failed to create tool:', error)
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-card rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Create New Tool</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Tool Name</label>
-            <Input
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Enter tool name"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Description</label>
-            <textarea
-              className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-              rows={3}
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Describe what this tool does"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Type</label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as ToolType }))}
-                className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-              >
-                <option value="api">API</option>
-                <option value="webhook">Webhook</option>
-                <option value="database">Database</option>
-                <option value="email">Email</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Category</label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as ToolCategory }))}
-                className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-              >
-                <option value="communication">Communication</option>
-                <option value="data">Data</option>
-                <option value="automation">Automation</option>
-                <option value="ai">AI</option>
-                <option value="integration">Integration</option>
-                <option value="utility">Utility</option>
-              </select>
-            </div>
-          </div>
-
-          {formData.type === 'api' && (
-            <>
-              <div>
-                <label className="block text-sm font-medium mb-2">API Endpoint</label>
-                <Input
-                  value={formData.endpoint}
-                  onChange={(e) => setFormData(prev => ({ ...prev, endpoint: e.target.value }))}
-                  placeholder="https://api.example.com/endpoint"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">HTTP Method</label>
-                <select
-                  value={formData.method}
-                  onChange={(e) => setFormData(prev => ({ ...prev, method: e.target.value as any }))}
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-                >
-                  <option value="GET">GET</option>
-                  <option value="POST">POST</option>
-                  <option value="PUT">PUT</option>
-                  <option value="DELETE">DELETE</option>
-                  <option value="PATCH">PATCH</option>
-                </select>
-              </div>
-            </>
-          )}
-
-          <div className="flex space-x-2 pt-4">
-            <Button type="submit" className="flex-1">
-              Create Tool
-            </Button>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </div>
     </div>
   )
 }

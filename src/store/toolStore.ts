@@ -17,107 +17,8 @@ interface ToolStore {
   fetchExecutions: (toolId?: string) => Promise<void>
 }
 
-// Built-in tools that come with the platform
-const builtInTools: Tool[] = [
-  {
-    id: 'web-search',
-    name: 'Web Search',
-    description: 'Search the web for up-to-date information',
-    type: 'ai',
-    category: 'data',
-    status: 'active',
-    isBuiltIn: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    config: {
-      parameters: [
-        {
-          id: 'query',
-          name: 'query',
-          type: 'string',
-          required: true,
-          description: 'The search query'
-        }
-      ]
-    }
-  },
-  {
-    id: 'email-sender',
-    name: 'Email Sender',
-    description: 'Send emails via SMTP or email service',
-    type: 'email',
-    category: 'communication',
-    status: 'active',
-    isBuiltIn: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    config: {
-      parameters: [
-        {
-          id: 'to',
-          name: 'to',
-          type: 'string',
-          required: true,
-          description: 'Recipient email address'
-        },
-        {
-          id: 'subject',
-          name: 'subject',
-          type: 'string',
-          required: true,
-          description: 'Email subject'
-        },
-        {
-          id: 'body',
-          name: 'body',
-          type: 'string',
-          required: true,
-          description: 'Email body content'
-        }
-      ]
-    }
-  },
-  {
-    id: 'http-request',
-    name: 'HTTP Request',
-    description: 'Make HTTP requests to any API endpoint',
-    type: 'api',
-    category: 'integration',
-    status: 'active',
-    isBuiltIn: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    config: {
-      method: 'GET',
-      parameters: [
-        {
-          id: 'url',
-          name: 'url',
-          type: 'string',
-          required: true,
-          description: 'The URL to make the request to'
-        },
-        {
-          id: 'headers',
-          name: 'headers',
-          type: 'object',
-          required: false,
-          description: 'Request headers'
-        },
-        {
-          id: 'body',
-          name: 'body',
-          type: 'object',
-          required: false,
-          description: 'Request body for POST/PUT requests'
-        }
-      ]
-    }
-  }
-]
-
 export const useToolStore = create<ToolStore>((set, get) => ({
-  tools: builtInTools,
+  tools: [],
   executions: [],
   isLoading: false,
   error: null,
@@ -125,9 +26,28 @@ export const useToolStore = create<ToolStore>((set, get) => ({
   fetchTools: async () => {
     set({ isLoading: true, error: null })
     try {
-      // For now, we'll use the built-in tools
-      // In a real implementation, you'd fetch custom tools from the database
-      set({ tools: builtInTools, isLoading: false })
+      const { data, error } = await supabase
+        .from('tools')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      const tools: Tool[] = (data || []).map(tool => ({
+        id: tool.id,
+        name: tool.name,
+        description: tool.description || '',
+        type: tool.type,
+        category: tool.category,
+        status: tool.status,
+        config: tool.config,
+        isBuiltIn: tool.is_built_in,
+        createdAt: tool.created_at,
+        updatedAt: tool.updated_at,
+        userId: tool.user_id
+      }))
+
+      set({ tools, isLoading: false })
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch tools', 
@@ -139,21 +59,42 @@ export const useToolStore = create<ToolStore>((set, get) => ({
   createTool: async (toolData) => {
     set({ isLoading: true, error: null })
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const { data, error } = await supabase
+        .from('tools')
+        .insert({
+          user_id: user.id,
+          name: toolData.name || 'New Tool',
+          description: toolData.description || '',
+          type: toolData.type || 'custom',
+          category: toolData.category || 'utility',
+          status: toolData.status || 'inactive',
+          config: toolData.config || { parameters: [] },
+          is_built_in: false
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
       const newTool: Tool = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: toolData.name || 'New Tool',
-        description: toolData.description || '',
-        type: toolData.type || 'custom',
-        category: toolData.category || 'utility',
-        status: 'inactive',
-        isBuiltIn: false,
-        config: toolData.config || { parameters: [] },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        id: data.id,
+        name: data.name,
+        description: data.description || '',
+        type: data.type,
+        category: data.category,
+        status: data.status,
+        config: data.config,
+        isBuiltIn: data.is_built_in,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        userId: data.user_id
       }
       
       set(state => ({ 
-        tools: [...state.tools, newTool], 
+        tools: [newTool, ...state.tools], 
         isLoading: false 
       }))
       
@@ -170,10 +111,30 @@ export const useToolStore = create<ToolStore>((set, get) => ({
   updateTool: async (id, updates) => {
     set({ isLoading: true, error: null })
     try {
+      const { data, error } = await supabase
+        .from('tools')
+        .update({
+          name: updates.name,
+          description: updates.description,
+          type: updates.type,
+          category: updates.category,
+          status: updates.status,
+          config: updates.config
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
       set(state => ({
         tools: state.tools.map(tool =>
           tool.id === id
-            ? { ...tool, ...updates, updatedAt: new Date().toISOString() }
+            ? { 
+                ...tool, 
+                ...updates, 
+                updatedAt: data.updated_at 
+              }
             : tool
         ),
         isLoading: false
@@ -189,8 +150,15 @@ export const useToolStore = create<ToolStore>((set, get) => ({
   deleteTool: async (id) => {
     set({ isLoading: true, error: null })
     try {
+      const { error } = await supabase
+        .from('tools')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
       set(state => ({
-        tools: state.tools.filter(tool => tool.id !== id && !tool.isBuiltIn),
+        tools: state.tools.filter(tool => tool.id !== id),
         isLoading: false
       }))
     } catch (error) {
@@ -204,22 +172,70 @@ export const useToolStore = create<ToolStore>((set, get) => ({
   testTool: async (id, input) => {
     set({ isLoading: true, error: null })
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
       const tool = get().tools.find(t => t.id === id)
       if (!tool) throw new Error('Tool not found')
 
-      // Mock tool execution
+      const startTime = Date.now()
+      
+      // Mock tool execution for now
+      // In a real implementation, this would call the actual tool
+      let output: any
+      let status: 'completed' | 'failed' = 'completed'
+      let errorMessage: string | undefined
+
+      try {
+        if (tool.type === 'api' && tool.config.endpoint) {
+          // Mock API call
+          output = {
+            success: true,
+            message: `API call to ${tool.config.endpoint} completed`,
+            data: { mockResponse: 'This is a mock response' },
+            statusCode: 200
+          }
+        } else {
+          output = {
+            success: true,
+            message: `Tool "${tool.name}" executed successfully`,
+            data: { result: 'Mock execution result', input }
+          }
+        }
+      } catch (error) {
+        status = 'failed'
+        errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        output = null
+      }
+
+      const executionTime = Date.now() - startTime
+
+      // Save execution to database
+      const { data: executionData, error: executionError } = await supabase
+        .from('tool_executions')
+        .insert({
+          tool_id: id,
+          user_id: user.id,
+          status,
+          input_data: input,
+          output_data: output,
+          error_message: errorMessage,
+          execution_time_ms: executionTime
+        })
+        .select()
+        .single()
+
+      if (executionError) throw executionError
+
       const execution: ToolExecution = {
-        id: Math.random().toString(36).substr(2, 9),
-        toolId: id,
-        status: 'completed',
-        input,
-        output: {
-          success: true,
-          message: `Tool "${tool.name}" executed successfully`,
-          data: { result: 'Mock response data' }
-        },
-        executionTime: Math.floor(Math.random() * 1000) + 100,
-        createdAt: new Date().toISOString()
+        id: executionData.id,
+        toolId: executionData.tool_id,
+        status: executionData.status,
+        input: executionData.input_data,
+        output: executionData.output_data,
+        error: executionData.error_message,
+        executionTime: executionData.execution_time_ms,
+        createdAt: executionData.created_at
       }
 
       set(state => ({
@@ -229,33 +245,46 @@ export const useToolStore = create<ToolStore>((set, get) => ({
 
       return execution
     } catch (error) {
-      const execution: ToolExecution = {
-        id: Math.random().toString(36).substr(2, 9),
-        toolId: id,
-        status: 'failed',
-        input,
-        output: null,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        executionTime: 0,
-        createdAt: new Date().toISOString()
-      }
-
-      set(state => ({
-        executions: [execution, ...state.executions],
+      set({ 
         error: error instanceof Error ? error.message : 'Failed to test tool',
-        isLoading: false
-      }))
-
-      return execution
+        isLoading: false 
+      })
+      throw error
     }
   },
 
   fetchExecutions: async (toolId) => {
     set({ isLoading: true, error: null })
     try {
-      // Mock executions data
-      const mockExecutions: ToolExecution[] = []
-      set({ executions: mockExecutions, isLoading: false })
+      let query = supabase
+        .from('tool_executions')
+        .select(`
+          *,
+          tools!inner(name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (toolId) {
+        query = query.eq('tool_id', toolId)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+
+      const executions: ToolExecution[] = (data || []).map(execution => ({
+        id: execution.id,
+        toolId: execution.tool_id,
+        status: execution.status,
+        input: execution.input_data,
+        output: execution.output_data,
+        error: execution.error_message,
+        executionTime: execution.execution_time_ms,
+        createdAt: execution.created_at
+      }))
+
+      set({ executions, isLoading: false })
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch executions', 
