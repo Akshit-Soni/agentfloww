@@ -2,6 +2,47 @@
 
 All notable changes to the AI Agent Platform will be documented in this file.
 
+## [0.2.0] - 2025-01-27
+
+### Added
+- **Workflow-Tools Integration**: Complete integration between Tools and Workflow Builder
+  - New Tool Node type for workflows with visual representation
+  - Tool selection and configuration in Properties Panel
+  - Parameter mapping with variable substitution support
+  - Real tool execution within workflow engine
+  - Tool execution logging and monitoring
+- **Enhanced Workflow Engine**:
+  - ToolService for executing different tool types (API, Webhook, Email, AI, Custom)
+  - Support for tool parameter validation and error handling
+  - Variable substitution in tool parameters (e.g., `{{input}}`, `{{previousNode}}`)
+  - Comprehensive tool execution logging
+- **Improved Node Palette**:
+  - Added Tool node category with proper categorization
+  - Enhanced search and filtering capabilities
+  - Better visual organization of node types
+- **Tool Execution Engine**:
+  - API tool execution with HTTP methods and parameter substitution
+  - Webhook tool support
+  - Email tool integration (mock implementation)
+  - AI tool execution (web search, text analysis)
+  - Custom tool execution framework
+  - Timeout and retry mechanisms
+  - Comprehensive error handling and logging
+
+### Technical Implementation
+- New ToolService class for centralized tool execution
+- Enhanced WorkflowEngine with tool node support
+- Improved PropertiesPanel with tool configuration UI
+- Tool parameter validation and type checking
+- Variable substitution system for dynamic parameter values
+- Comprehensive execution logging and monitoring
+
+### Security
+- Tool access control based on ownership and built-in status
+- User authentication checks for tool execution
+- Input validation and sanitization
+- Secure parameter handling and substitution
+
 ## [0.1.0] - 2025-01-27
 
 ### Added
