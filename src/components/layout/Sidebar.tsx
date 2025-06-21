@@ -1,18 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  Workflow, 
-  Bot, 
-  Store, 
-  BarChart3, 
-  Settings,
-  Zap,
-  Plus,
-  Play,
-  Wrench,
-  FileTemplate
-} from 'lucide-react'
+import { LayoutDashboard, Workflow, Bot, Store, BarChart3, Settings, Zap, Plus, Play, Wrench, BookTemplate as FileTemplate } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 
