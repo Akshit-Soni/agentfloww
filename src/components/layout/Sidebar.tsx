@@ -10,13 +10,15 @@ import {
   Zap,
   Plus,
   Play,
-  Wrench
+  Wrench,
+  FileTemplate
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Templates', href: '/templates', icon: FileTemplate },
   { name: 'Agent Library', href: '/agents', icon: Bot },
   { name: 'Workflow Builder', href: '/builder', icon: Workflow },
   { name: 'Executions', href: '/executions', icon: Play },
@@ -76,7 +78,7 @@ export function Sidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-border">
         <div className="text-xs text-muted-foreground">
-          <p>Version 0.1.0</p>
+          <p>Version 0.2.0</p>
           <p className="mt-1">© 2025 AI Agent Platform</p>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { Settings } from '@/pages/Settings'
 import { WorkflowExecutions } from '@/pages/WorkflowExecutions'
 import { Tools } from '@/pages/Tools'
 import { ToolBuilder } from '@/pages/ToolBuilder'
+import { Templates } from '@/pages/Templates'
 import { Toaster } from '@/components/ui/Toaster'
 import { ToastProvider } from '@/components/ui/Toast'
 
@@ -33,6 +34,7 @@ function App() {
               <Route path="/tools" element={<Tools />} />
               <Route path="/tools/new" element={<ToolBuilder />} />
               <Route path="/tools/edit/:toolId" element={<ToolBuilder />} />
+              <Route path="/templates" element={<Templates />} />
               <Route path="/marketplace" element={<ModelMarketplace />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />
