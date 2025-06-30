@@ -2,7 +2,16 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AuthGuard } from '@/components/auth/AuthGuard'
 import { Layout } from '@/components/layout/Layout'
+import { LandingLayout } from '@/components/layout/LandingLayout'
 import { Landing } from '@/pages/Landing'
+import { About } from '@/pages/About'
+import { Services } from '@/pages/Services'
+import { Contact } from '@/pages/Contact'
+import { Blog } from '@/pages/Blog'
+import { FAQ } from '@/pages/FAQ'
+import { Privacy } from '@/pages/Privacy'
+import { Terms } from '@/pages/Terms'
+import { NotFound } from '@/pages/NotFound'
 import { Dashboard } from '@/pages/Dashboard'
 import { WorkflowBuilder } from '@/pages/WorkflowBuilder'
 import { AgentLibrary } from '@/pages/AgentLibrary'
@@ -23,8 +32,49 @@ function App() {
       <ToastProvider>
         <Toaster />
         <Routes>
-          {/* Public landing page */}
-          <Route path="/" element={<Landing />} />
+          {/* Public landing pages */}
+          <Route path="/" element={
+            <LandingLayout>
+              <Landing />
+            </LandingLayout>
+          } />
+          <Route path="/about" element={
+            <LandingLayout>
+              <About />
+            </LandingLayout>
+          } />
+          <Route path="/services" element={
+            <LandingLayout>
+              <Services />
+            </LandingLayout>
+          } />
+          <Route path="/contact" element={
+            <LandingLayout>
+              <Contact />
+            </LandingLayout>
+          } />
+          <Route path="/blog" element={
+            <LandingLayout>
+              <Blog />
+            </LandingLayout>
+          } />
+          <Route path="/faq" element={
+            <LandingLayout>
+              <FAQ />
+            </LandingLayout>
+          } />
+          <Route path="/privacy" element={
+            <LandingLayout>
+              <Privacy />
+            </LandingLayout>
+          } />
+          <Route path="/terms" element={
+            <LandingLayout>
+              <Terms />
+            </LandingLayout>
+          } />
+          
+          {/* Auth route */}
           <Route path="/login" element={<AuthGuard />} />
           
           {/* Protected routes */}
@@ -126,6 +176,9 @@ function App() {
               </Layout>
             </AuthGuard>
           } />
+          
+          {/* 404 page */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </ToastProvider>
     </div>

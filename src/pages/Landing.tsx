@@ -2,7 +2,6 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { BoltBadge } from '@/components/ui/BoltBadge'
 import { 
   ArrowRight, 
   Bot, 
@@ -17,15 +16,11 @@ import {
   Rocket,
   Brain,
   Settings,
-  Globe,
-  Menu,
-  X
+  Globe
 } from 'lucide-react'
-import { useState } from 'react'
 
 export function Landing() {
   const navigate = useNavigate()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const features = [
     {
@@ -112,88 +107,6 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b border-border bg-white/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">agentfloww</h1>
-              </div>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-                Features
-              </a>
-              <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-                How it Works
-              </a>
-              <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">
-                Testimonials
-              </a>
-              <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                Pricing
-              </a>
-            </div>
-
-            {/* Auth Buttons */}
-            <div className="hidden md:flex items-center space-x-4">
-              <Button variant="ghost" onClick={() => navigate('/login')}>
-                Sign In
-              </Button>
-              <Button onClick={() => navigate('/login')}>
-                Get Started
-              </Button>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <div className="md:hidden border-t border-border bg-white py-4">
-              <div className="flex flex-col space-y-4">
-                <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Features
-                </a>
-                <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-                  How it Works
-                </a>
-                <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Testimonials
-                </a>
-                <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Pricing
-                </a>
-                <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                  <Button variant="ghost" onClick={() => navigate('/login')} className="justify-start">
-                    Sign In
-                  </Button>
-                  <Button onClick={() => navigate('/login')} className="justify-start">
-                    Get Started
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
@@ -210,7 +123,7 @@ export function Landing() {
               in Minutes
             </h1>
             
-            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-mute-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
               Create, deploy, and manage sophisticated AI agents that automate your workflows, 
               enhance customer experiences, and drive business growth—all without writing a single line of code.
             </p>
@@ -412,77 +325,6 @@ export function Landing() {
           </p>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-background border-t border-border py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Company Info */}
-            <div className="md:col-span-1">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <h3 className="text-lg font-bold text-foreground">agentfloww</h3>
-              </div>
-              <p className="text-muted-foreground mb-4">
-                The leading platform for building and deploying intelligent AI agents.
-              </p>
-              <BoltBadge />
-            </div>
-
-            {/* Product Links */}
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Product</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#features" className="hover:text-foreground transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Templates</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Integrations</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">API</a></li>
-              </ul>
-            </div>
-
-            {/* Company Links */}
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Company</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
-              </ul>
-            </div>
-
-            {/* Support Links */}
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Support</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Community</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Status</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-muted-foreground text-sm">
-              © 2025 agentfloww. All rights reserved.
-            </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
-                Terms of Service
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">
-                Cookie Policy
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
