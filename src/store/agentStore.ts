@@ -33,6 +33,7 @@ interface AgentStore {
   fetchAgents: () => Promise<void>
   createAgent: (agentData: Partial<Agent>) => Promise<Agent>
   updateAgent: (id: string, updates: Partial<Agent>) => Promise<void>
+  updateWorkflow: (workflow: Agent['workflow']) => void
   deleteAgent: (id: string) => Promise<void>
   setCurrentAgent: (agent: Agent | null) => void
   deployAgent: (id: string) => Promise<string>
@@ -139,6 +140,26 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
         isLoading: false 
       })
     }
+  },
+
+  updateWorkflow: (workflow) => {
+    const currentAgent = get().currentAgent
+    if (!currentAgent) return
+
+    const updatedAgent = {
+      ...currentAgent,
+      workflow
+    }
+
+    // Update local state immediately
+    set({ currentAgent: updatedAgent })
+
+    // Update the agent in the agents array
+    const agents = get().agents
+    const updatedAgents = agents.map(agent => 
+      agent.id === currentAgent.id ? updatedAgent : agent
+    )
+    set({ agents: updatedAgents })
   },
 
   deleteAgent: async (id) => {
