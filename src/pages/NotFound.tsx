@@ -133,7 +133,7 @@ export function NotFound() {
             >
               contact our support team
             </button>
-            {' '}and we'll help you find what you're looking for.
+            {' '}and we'll help you find what you\'re looking for.
           </p>
         </div>
       </div>
