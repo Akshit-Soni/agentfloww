@@ -28,7 +28,7 @@ export function AgentBuilder() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    type: 'llm' as 'llm' | 'hybrid' | 'rule-based',
+    type: 'llm' as 'llm' | 'hybrid' | 'rule-based' | 'event',
     status: 'draft' as 'draft' | 'active' | 'inactive' | 'deployed',
     persona: '',
     primaryObjective: '',
@@ -206,9 +206,10 @@ export function AgentBuilder() {
                   <option value="llm">LLM-based</option>
                   <option value="hybrid">Hybrid</option>
                   <option value="rule-based">Rule-based</option>
+                  <option value="event">Event-driven</option>
                 </select>
                 <p className="text-xs text-muted-foreground mt-1">
-                  LLM-based agents use language models, Hybrid combines multiple approaches, Rule-based uses predefined logic
+                  LLM-based agents use language models, Hybrid combines multiple approaches, Rule-based uses predefined logic, Event-driven responds to triggers
                 </p>
               </div>
             </CardContent>
