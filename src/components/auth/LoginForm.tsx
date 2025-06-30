@@ -21,7 +21,9 @@ export function LoginForm() {
   // Get redirect path from URL query params
   const getRedirectPath = () => {
     const searchParams = new URLSearchParams(location.search)
-    return searchParams.get('redirect') || '/dashboard'
+    const redirectPath = searchParams.get('redirect')
+    // Always redirect to dashboard after login if no specific redirect is provided
+    return redirectPath || '/dashboard'
   }
 
   // Clear errors when component mounts or when switching between login/signup
@@ -49,7 +51,7 @@ export function LoginForm() {
           title: 'Account created!',
           description: 'Your account has been created successfully.'
         })
-        navigate('/dashboard', { replace: true })
+        navigate('/dashboard', { replace: true }) // Always go to dashboard after signup
       }
     } catch (error) {
       // Error is already handled by the store

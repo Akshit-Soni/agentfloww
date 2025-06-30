@@ -26,7 +26,14 @@ export function Settings() {
   const [activeTab, setActiveTab] = useState('api-keys')
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [theme, setTheme] = useState('light')
+  const [theme, setTheme] = useState(() => {
+    // Get saved theme from localStorage or use system preference as default
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme) return savedTheme
+    
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    return prefersDark ? 'dark' : 'light'
+  })
   const [language, setLanguage] = useState('en')
   const [timezone, setTimezone] = useState('UTC')
 
@@ -70,22 +77,28 @@ export function Settings() {
   ])
 
   useEffect(() => {
-    // Initialize theme based on system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    setTheme(prefersDark ? 'dark' : 'light')
-    
-    // Apply theme to document
-    document.documentElement.classList.toggle('dark', prefersDark)
+    // Apply theme on mount and when it changes
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else if (theme === 'light') {
+      document.documentElement.classList.remove('dark')
+    } else if (theme === 'system') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      document.documentElement.classList.toggle('dark', prefersDark)
+    }
   }, [])
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme)
+    localStorage.setItem('theme', newTheme)
     
     if (newTheme === 'system') {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
       document.documentElement.classList.toggle('dark', prefersDark)
+    } else if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark')
     } else {
-      document.documentElement.classList.toggle('dark', newTheme === 'dark')
+      document.documentElement.classList.remove('dark')
     }
     
     addToast({
@@ -94,6 +107,19 @@ export function Settings() {
       description: `Theme has been changed to ${newTheme}.`
     })
   }
+
+  // Listen for system theme changes if using "system" theme
+  useEffect(() => {
+    if (theme !== 'system') return
+    
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = (e: MediaQueryListEvent) => {
+      document.documentElement.classList.toggle('dark', newTheme === 'dark')
+    }
+    
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [theme])
 
   const handleProfileUpdate = async () => {
     setIsLoading(true)
@@ -445,9 +471,12 @@ export function Settings() {
                     onChange={(e) => handleThemeChange(e.target.value)}
                   >
                     <option value="light">Light</option>
-                    <option value="dark">Dark</option>
+                    <option value="dark">Dark Theme</option>
                     <option value="system">System</option>
                   </select>
+                  {theme === 'dark' && (
+                    <Badge className="mt-2 inline-block">Black Theme Selected</Badge>
+                  )}
                 </div>
 
                 <div>

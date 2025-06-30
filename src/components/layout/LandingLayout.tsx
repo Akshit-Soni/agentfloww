@@ -50,7 +50,7 @@ export function LandingLayout({ children }: LandingLayoutProps) {
                 <h1 className="text-xl font-bold text-foreground">agentfloww</h1>
               </div>
               {/* Bolt Badge in Header */}
-              <div className="ml-4">
+              <div className="ml-2">
                 <BoltBadge />
               </div>
             </div>

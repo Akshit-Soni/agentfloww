@@ -47,7 +47,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     // If user is already logged in, redirect to dashboard
     if (user) {
-      navigate('/dashboard', { replace: true })
+      // Only redirect if not already on the login page
+      if (currentPath !== '/login') {
+        navigate(`/login?redirect=${encodeURIComponent(currentPath)}`, { replace: true })
+      }
       return null
     }
 

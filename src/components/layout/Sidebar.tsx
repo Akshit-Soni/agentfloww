@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { BoltBadge } from '@/components/ui/BoltBadge'
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Templates', href: '/templates', icon: FileTemplate },
   { name: 'Agent Library', href: '/agents', icon: Bot },
   { name: 'Workflow Builder', href: '/builder', icon: Workflow },
