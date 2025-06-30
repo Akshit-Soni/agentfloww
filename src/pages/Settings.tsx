@@ -114,7 +114,7 @@ export function Settings() {
     
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = (e: MediaQueryListEvent) => {
-      document.documentElement.classList.toggle('dark', newTheme === 'dark')
+      document.documentElement.classList.toggle('dark', e.matches)
     }
     
     mediaQuery.addEventListener('change', handleChange)
