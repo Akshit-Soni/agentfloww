@@ -9,6 +9,8 @@ export function Header() {
   const handleSignOut = async () => {
     try {
       await signOut()
+      // Redirect to landing page after sign out
+      window.location.href = '/'
     } catch (error) {
       console.error('Sign out error:', error)
     }
