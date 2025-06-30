@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
+import { WorkflowDefinition } from '@/types/agent'
 
 export interface Agent {
   id: string
@@ -8,16 +9,7 @@ export interface Agent {
   description?: string
   type: 'llm' | 'hybrid' | 'rule-based'
   status: 'draft' | 'active' | 'inactive' | 'deployed'
-  workflow: {
-    nodes: any[]
-    edges: any[]
-    settings: {
-      timeout?: number
-      retries?: number
-      parallelism?: number
-      logging?: boolean
-    }
-  }
+  workflow: WorkflowDefinition
   deployed_url?: string
   created_at: string
   updated_at: string
@@ -33,7 +25,7 @@ interface AgentStore {
   fetchAgents: () => Promise<void>
   createAgent: (agentData: Partial<Agent>) => Promise<Agent>
   updateAgent: (id: string, updates: Partial<Agent>) => Promise<void>
-  updateWorkflow: (workflow: Agent['workflow']) => void
+  updateWorkflow: (workflow: WorkflowDefinition) => void
   deleteAgent: (id: string) => Promise<void>
   setCurrentAgent: (agent: Agent | null) => void
   deployAgent: (id: string) => Promise<string>
