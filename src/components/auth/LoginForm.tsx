@@ -1,22 +1,37 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { BoltBadge } from '@/components/ui/BoltBadge'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/components/ui/Toast'
-import { Zap } from 'lucide-react'
+import { Zap, AlertCircle } from 'lucide-react'
 
 export function LoginForm() {
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
-  const { signIn, signUp, isLoading } = useAuthStore()
+  const { signIn, signUp, isLoading, error, clearError } = useAuthStore()
   const { addToast } = useToast()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  // Get redirect path from URL query params
+  const getRedirectPath = () => {
+    const searchParams = new URLSearchParams(location.search)
+    return searchParams.get('redirect') || '/dashboard'
+  }
+
+  // Clear errors when component mounts or when switching between login/signup
+  useEffect(() => {
+    clearError()
+  }, [isLogin, clearError])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    clearError()
     
     try {
       if (isLogin) {
@@ -26,6 +41,7 @@ export function LoginForm() {
           title: 'Welcome back!',
           description: 'You have been successfully signed in.'
         })
+        navigate(getRedirectPath(), { replace: true })
       } else {
         await signUp(email, password, name)
         addToast({
@@ -33,13 +49,11 @@ export function LoginForm() {
           title: 'Account created!',
           description: 'Your account has been created successfully.'
         })
+        navigate('/dashboard', { replace: true })
       }
     } catch (error) {
-      addToast({
-        type: 'error',
-        title: isLogin ? 'Sign in failed' : 'Sign up failed',
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      // Error is already handled by the store
+      console.error('Auth error:', error)
     }
   }
 
@@ -65,6 +79,13 @@ export function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-start space-x-2">
+              <AlertCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>

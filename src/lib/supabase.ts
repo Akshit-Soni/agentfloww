@@ -25,11 +25,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    storageKey: 'agentfloww-auth-storage'
   },
   global: {
     headers: {
-      'X-Client-Info': 'supabase-js-web'
+      'X-Client-Info': 'agentfloww-web'
+    }
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
     }
   }
 })

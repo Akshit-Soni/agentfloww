@@ -17,22 +17,22 @@ export function NotFound() {
 
   const quickLinks = [
     {
-      title: 'Dashboard',
-      description: 'Go to your main dashboard',
+      title: 'Home',
+      description: 'Go to the home page',
       icon: Home,
+      action: () => navigate('/')
+    },
+    {
+      title: 'Dashboard',
+      description: 'Go to your dashboard',
+      icon: Bot,
       action: () => navigate('/dashboard')
     },
     {
-      title: 'Agent Library',
-      description: 'Browse your AI agents',
-      icon: Bot,
-      action: () => navigate('/agents')
-    },
-    {
-      title: 'Workflow Builder',
-      description: 'Create new workflows',
+      title: 'Login',
+      description: 'Sign in to your account',
       icon: Workflow,
-      action: () => navigate('/builder')
+      action: () => navigate('/login')
     },
     {
       title: 'Help Center',
@@ -122,20 +122,6 @@ export function NotFound() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Footer Note */}
-        <div className="mt-8 text-sm text-muted-foreground">
-          <p>
-            If you believe this is an error, please{' '}
-            <button 
-              onClick={() => navigate('/contact')}
-              className="text-primary hover:underline"
-            >
-              contact our support team
-            </button>
-            {' '}and we'll help you find what you\'re looking for.
-          </p>
-        </div>
       </div>
     </div>
   )
