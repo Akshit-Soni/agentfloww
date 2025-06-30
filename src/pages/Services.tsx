@@ -41,7 +41,7 @@ export function Services() {
       ],
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      price: 'Starting at $2,500/month'
+      price: 'Starting at $0/month'
     },
     {
       icon: Workflow,
@@ -56,7 +56,7 @@ export function Services() {
       ],
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
-      price: 'Starting at $1,500/month'
+      price: 'Starting at $0/month'
     },
     {
       icon: MessageSquare,
@@ -71,7 +71,7 @@ export function Services() {
       ],
       color: 'text-green-600',
       bgColor: 'bg-green-50',
-      price: 'Starting at $800/month'
+      price: 'Starting at $99/month'
     },
     {
       icon: BarChart3,
@@ -86,7 +86,7 @@ export function Services() {
       ],
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      price: 'Starting at $500/month'
+      price: 'Starting at $99/month'
     },
     {
       icon: Shield,
@@ -101,7 +101,7 @@ export function Services() {
       ],
       color: 'text-red-600',
       bgColor: 'bg-red-50',
-      price: 'Starting at $1,000/month'
+      price: 'Contact sales'
     },
     {
       icon: Headphones,
@@ -116,7 +116,7 @@ export function Services() {
       ],
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-50',
-      price: 'Custom pricing'
+      price: 'Contact sales'
     }
   ]
 
@@ -124,12 +124,12 @@ export function Services() {
     {
       id: 'starter',
       name: 'Starter',
-      price: '$99',
+      price: '$0',
       period: '/month',
       description: 'Perfect for small teams getting started with AI automation',
       features: [
         'Up to 3 AI agents',
-        '1,000 monthly executions',
+        '100 monthly executions',
         'Basic workflow builder',
         'Email support',
         'Standard integrations',
@@ -141,11 +141,11 @@ export function Services() {
     {
       id: 'professional',
       name: 'Professional',
-      price: '$299',
+      price: '$99',
       period: '/month',
       description: 'Ideal for growing businesses with advanced automation needs',
       features: [
-        'Up to 10 AI agents',
+        'Up to 3 AI agents',
         '10,000 monthly executions',
         'Advanced workflow builder',
         'Priority support',
@@ -160,7 +160,7 @@ export function Services() {
     {
       id: 'enterprise',
       name: 'Enterprise',
-      price: 'Custom',
+      price: 'Contact',
       period: '',
       description: 'Tailored solutions for large organizations with complex requirements',
       features: [
@@ -183,8 +183,8 @@ export function Services() {
     {
       category: 'Core Features',
       features: [
-        { name: 'AI Agents', starter: '3', professional: '10', enterprise: 'Unlimited' },
-        { name: 'Monthly Executions', starter: '1,000', professional: '10,000', enterprise: 'Unlimited' },
+        { name: 'AI Agents', starter: '3', professional: '3', enterprise: 'Unlimited' },
+        { name: 'Monthly Executions', starter: '100', professional: '10,000', enterprise: 'Unlimited' },
         { name: 'Workflow Builder', starter: 'Basic', professional: 'Advanced', enterprise: 'Custom' },
         { name: 'Integrations', starter: 'Standard', professional: 'Premium', enterprise: 'Custom' }
       ]

@@ -10,9 +10,6 @@ import {
   Workflow, 
   Wrench, 
   Play, 
-  TrendingUp, 
-  Users, 
-  Clock,
   Plus,
   ArrowRight,
   BookTemplate as FileTemplate
@@ -56,14 +53,6 @@ export function Dashboard() {
       icon: Wrench,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50'
-    },
-    {
-      title: 'Executions Today',
-      value: 0,
-      description: 'No executions yet',
-      icon: TrendingUp,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50'
     }
   ]
 
@@ -119,7 +108,7 @@ export function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
           <Card key={index}>
             <CardContent className="p-6">

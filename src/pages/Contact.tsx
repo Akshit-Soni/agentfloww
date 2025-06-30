@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -7,19 +8,14 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  Clock, 
-  MessageSquare,
   Send,
-  Globe,
-  Linkedin,
-  Twitter,
   Github,
-  AlertCircle,
-  CheckCircle
+  Linkedin
 } from 'lucide-react'
 
 export function Contact() {
   const { addToast } = useToast()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -73,7 +69,7 @@ export function Contact() {
     {
       icon: Mail,
       title: 'Email Us',
-      details: 'hello@agentfloww.com',
+      details: 'soniakshit15502@gmail.com',
       description: 'Send us an email anytime',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50'
@@ -81,68 +77,16 @@ export function Contact() {
     {
       icon: Phone,
       title: 'Call Us',
-      details: '+1 (555) 123-4567',
-      description: 'Mon-Fri from 8am to 6pm PST',
+      details: '+91 9358841182',
+      description: 'Mon-Fri from 8am to 6pm IST',
       color: 'text-green-600',
       bgColor: 'bg-green-50'
-    },
-    {
-      icon: MessageSquare,
-      title: 'Live Chat',
-      details: 'Available 24/7',
-      description: 'Get instant support',
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
-    },
-    {
-      icon: AlertCircle,
-      title: 'Emergency Support',
-      details: '+1 (555) 999-0000',
-      description: 'For critical issues only',
-      color: 'text-red-600',
-      bgColor: 'bg-red-50'
     }
-  ]
-
-  const offices = [
-    {
-      city: 'San Francisco',
-      address: '123 Innovation Drive, Suite 400',
-      zipCode: 'San Francisco, CA 94105',
-      phone: '+1 (555) 123-4567',
-      email: 'sf@agentfloww.com',
-      isHeadquarters: true
-    },
-    {
-      city: 'New York',
-      address: '456 Tech Avenue, Floor 15',
-      zipCode: 'New York, NY 10001',
-      phone: '+1 (555) 234-5678',
-      email: 'ny@agentfloww.com',
-      isHeadquarters: false
-    },
-    {
-      city: 'London',
-      address: '789 Digital Street, Level 8',
-      zipCode: 'London, UK EC2A 4DP',
-      phone: '+44 20 7123 4567',
-      email: 'london@agentfloww.com',
-      isHeadquarters: false
-    }
-  ]
-
-  const businessHours = [
-    { day: 'Monday - Friday', hours: '8:00 AM - 6:00 PM PST' },
-    { day: 'Saturday', hours: '10:00 AM - 4:00 PM PST' },
-    { day: 'Sunday', hours: 'Closed' },
-    { day: 'Emergency Support', hours: '24/7 Available' }
   ]
 
   const socialLinks = [
-    { icon: Twitter, name: 'Twitter', url: 'https://twitter.com/agentfloww' },
-    { icon: Linkedin, name: 'LinkedIn', url: 'https://linkedin.com/company/agentfloww' },
-    { icon: Github, name: 'GitHub', url: 'https://github.com/agentfloww' },
-    { icon: Globe, name: 'Blog', url: '/blog' }
+    { icon: Github, name: 'GitHub', url: 'https://github.com/Akshit-Soni/No-Code-Agent-Maker' },
+    { icon: Linkedin, name: 'LinkedIn', url: 'https://www.linkedin.com/in/akshit-soni-627745232/' }
   ]
 
   return (
@@ -177,7 +121,7 @@ export function Contact() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {contactInfo.map((info, index) => (
               <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 text-center">
                 <CardHeader>
@@ -303,54 +247,28 @@ export function Contact() {
             <div className="space-y-8">
               {/* Office Locations */}
               <div>
-                <h3 className="text-2xl font-bold text-foreground mb-6">Our Offices</h3>
-                <div className="space-y-6">
-                  {offices.map((office, index) => (
-                    <Card key={index} className="border shadow-sm">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <h4 className="text-lg font-semibold text-foreground">{office.city}</h4>
-                          {office.isHeadquarters && (
-                            <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
-                              Headquarters
-                            </span>
-                          )}
-                        </div>
-                        <div className="space-y-2 text-sm text-muted-foreground">
-                          <div className="flex items-start space-x-2">
-                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                            <div>
-                              <p>{office.address}</p>
-                              <p>{office.zipCode}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Phone className="w-4 h-4 flex-shrink-0" />
-                            <p>{office.phone}</p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Mail className="w-4 h-4 flex-shrink-0" />
-                            <p>{office.email}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Business Hours */}
-              <div>
-                <h3 className="text-2xl font-bold text-foreground mb-6">Business Hours</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-6">Our Office</h3>
                 <Card className="border shadow-sm">
                   <CardContent className="p-6">
-                    <div className="space-y-3">
-                      {businessHours.map((schedule, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-foreground">{schedule.day}</span>
-                          <span className="text-sm text-muted-foreground">{schedule.hours}</span>
+                    <div className="flex items-start justify-between mb-4">
+                      <h4 className="text-lg font-semibold text-foreground">VIT Bhopal University</h4>
+                    </div>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-start space-x-2">
+                        <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p>Kothri Kalan, Sehore</p>
+                          <p>Madhya Pradesh, 466114</p>
                         </div>
-                      ))}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Phone className="w-4 h-4 flex-shrink-0" />
+                        <p>+91 9358841182</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Mail className="w-4 h-4 flex-shrink-0" />
+                        <p>soniakshit15502@gmail.com</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -358,7 +276,7 @@ export function Contact() {
 
               {/* Social Media */}
               <div>
-                <h3 className="text-2xl font-bold text-foreground mb-6">Follow Us</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-6">Connect With Us</h3>
                 <div className="flex space-x-4">
                   {socialLinks.map((social, index) => (
                     <a
@@ -385,7 +303,7 @@ export function Contact() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">Find Us</h2>
             <p className="text-xl text-muted-foreground">
-              Visit our headquarters in San Francisco or connect with us virtually.
+              Visit our office at VIT Bhopal University or connect with us virtually.
             </p>
           </div>
 
@@ -395,8 +313,8 @@ export function Contact() {
               <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600">Interactive map would be integrated here</p>
               <p className="text-sm text-gray-500 mt-2">
-                123 Innovation Drive, Suite 400<br />
-                San Francisco, CA 94105
+                VIT Bhopal University<br />
+                Kothri Kalan, Sehore, Madhya Pradesh, 466114
               </p>
             </div>
           </div>

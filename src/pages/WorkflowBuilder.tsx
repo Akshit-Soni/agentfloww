@@ -42,7 +42,7 @@ export function WorkflowBuilder() {
   const { agentId } = useParams()
   const [searchParams] = useSearchParams()
   const templateId = searchParams.get('template')
-  const { currentAgent, setCurrentAgent, agents, updateWorkflow, updateAgent } = useAgentStore()
+  const { currentAgent, setCurrentAgent, agents, updateAgent } = useAgentStore()
   const { createWorkflowFromTemplate, workflowTemplates } = useTemplateStore()
   const { addToast } = useToast()
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
@@ -163,7 +163,6 @@ export function WorkflowBuilder() {
         edges,
         settings: currentAgent.workflow.settings
       }
-      updateWorkflow(workflow)
       
       // Save to database
       try {
@@ -188,7 +187,7 @@ export function WorkflowBuilder() {
         description: 'Please create an agent first to save this workflow.'
       })
     }
-  }, [nodes, edges, currentAgent, updateWorkflow, updateAgent, addToast])
+  }, [nodes, edges, currentAgent, updateAgent, addToast])
 
   // Auto-save workflow changes with debouncing
   useEffect(() => {
@@ -200,12 +199,14 @@ export function WorkflowBuilder() {
           edges,
           settings: currentAgentState.workflow.settings
         }
-        updateWorkflow(workflow)
+        
+        // Update local state
+        useAgentStore.getState().updateWorkflow(workflow)
       }, 1000) // Debounce for 1 second
 
       return () => clearTimeout(timeoutId)
     }
-  }, [nodes, edges, updateWorkflow])
+  }, [nodes, edges])
 
   return (
     <div className="h-full flex">
