@@ -49,6 +49,6 @@ supabase.from('users').select('count', { count: 'exact', head: true })
       console.log('Supabase connection test successful')
     }
   })
-  .catch((error) => {
+  .catch((error: any) => {
     console.error('Supabase connection test error:', error)
   })
