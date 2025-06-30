@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Workflow, Bot, Store, BarChart3, Settings, Zap, Plus, Play, Wrench, BookTemplate as FileTemplate } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
+import { BoltBadge } from '@/components/ui/BoltBadge'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -26,8 +27,8 @@ export function Sidebar() {
             <Zap className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground">AI Agent</h1>
-            <p className="text-xs text-muted-foreground">Platform</p>
+            <h1 className="text-lg font-bold text-foreground">agentfloww</h1>
+            <p className="text-xs text-muted-foreground">AI Agent Platform</p>
           </div>
         </div>
       </div>
@@ -64,10 +65,11 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
-        <div className="text-xs text-muted-foreground">
-          <p>Version 0.2.0</p>
-          <p className="mt-1">© 2025 AI Agent Platform</p>
+      <div className="p-4 border-t border-border space-y-2">
+        <BoltBadge className="justify-center w-full" />
+        <div className="text-xs text-muted-foreground text-center">
+          <p>Version 0.4.1</p>
+          <p className="mt-1">© 2025 agentfloww</p>
         </div>
       </div>
     </div>

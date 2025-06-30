@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { BoltBadge } from '@/components/ui/BoltBadge'
 import { useAgentStore } from '@/store/agentStore'
 import { useToolStore } from '@/store/toolStore'
 import { 
@@ -13,7 +14,8 @@ import {
   Users, 
   Clock,
   Plus,
-  ArrowRight
+  ArrowRight,
+  BookTemplate as FileTemplate
 } from 'lucide-react'
 
 export function Dashboard() {
@@ -99,7 +101,7 @@ export function Dashboard() {
   const recentAgents = agents.slice(0, 3)
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 relative">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -108,10 +110,12 @@ export function Dashboard() {
             Welcome back! Here's what's happening with your AI agents.
           </p>
         </div>
-        <Button onClick={() => navigate('/agents/new')}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create Agent
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button onClick={() => navigate('/agents/new')}>
+            <Plus className="w-4 h-4 mr-2" />
+            Create Agent
+          </Button>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -274,9 +278,11 @@ export function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Bolt.new Badge - positioned in bottom right corner */}
+      <div className="fixed bottom-4 right-4 z-10">
+        <BoltBadge />
+      </div>
     </div>
   )
 }
-
-// Fix missing import
-import { BookTemplate as FileTemplate } from 'lucide-react'

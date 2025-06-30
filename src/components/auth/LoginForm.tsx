@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { BoltBadge } from '@/components/ui/BoltBadge'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/components/ui/Toast'
 import { Zap } from 'lucide-react'
@@ -43,7 +44,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 relative">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
@@ -51,8 +52,8 @@ export function LoginForm() {
               <Zap className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">AI Agent</h1>
-              <p className="text-sm text-muted-foreground">Platform</p>
+              <h1 className="text-xl font-bold text-foreground">agentfloww</h1>
+              <p className="text-sm text-muted-foreground">AI Agent Platform</p>
             </div>
           </div>
           <CardTitle>{isLogin ? 'Welcome back' : 'Create account'}</CardTitle>
@@ -119,6 +120,11 @@ export function LoginForm() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Bolt.new Badge */}
+      <div className="absolute bottom-4 right-4">
+        <BoltBadge />
+      </div>
     </div>
   )
 }

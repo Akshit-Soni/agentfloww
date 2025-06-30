@@ -1,8 +1,21 @@
 # Changelog
 
-All notable changes to the AI Agent Platform will be documented in this file.
+All notable changes to agentfloww will be documented in this file.
 
-## [0.4.1] - 2025-01-27 - Critical Bug Fixes and Security Enhancements
+## [0.4.1] - 2025-01-27 - Branding Update & Critical Bug Fixes
+
+### Added - Branding Updates
+- **New Brand Identity**: Updated application name from "AI Agent Platform" to "agentfloww"
+  - Updated all UI components, titles, and references throughout the application
+  - Consistent branding across login, dashboard, sidebar, and all pages
+  - Updated package.json with new name and description
+  - Updated HTML title and meta information
+- **Bolt.new Attribution**: Added subtle "Built with Bolt.new" badge
+  - Positioned on login page (bottom right)
+  - Positioned on dashboard (bottom right, fixed)
+  - Positioned in sidebar footer
+  - Includes external link to bolt.new with proper attribution
+  - Subtle design that doesn't interfere with user experience
 
 ### Fixed Issues
 
