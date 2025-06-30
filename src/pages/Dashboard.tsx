@@ -279,4 +279,4 @@ export function Dashboard() {
 }
 
 // Fix missing import
-import { FileTemplate } from 'lucide-react'
+import { BookTemplate as FileTemplate } from 'lucide-react'
