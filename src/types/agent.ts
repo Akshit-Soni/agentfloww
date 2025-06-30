@@ -1,6 +1,7 @@
 import { Node, Edge } from 'reactflow'
 
-export interface WorkflowNode extends Node {
+export interface WorkflowNode extends Omit<Node, 'type'> {
+  type: string
   data: {
     label: string
     config?: Record<string, any>
@@ -9,7 +10,7 @@ export interface WorkflowNode extends Node {
   }
 }
 
-export interface WorkflowEdge extends Edge {
+export type WorkflowEdge = Edge & {
   id: string
   source: string
   target: string

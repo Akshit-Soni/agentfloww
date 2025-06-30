@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 
 interface Toast {

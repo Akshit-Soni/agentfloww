@@ -12,7 +12,7 @@ export interface AgentTemplate {
   agentConfig: {
     name: string
     description: string
-    type: 'llm' | 'rule' | 'event' | 'hybrid'
+    type: 'llm' | 'rule-based' | 'event' | 'hybrid'
     persona: string
     primaryObjective: string
     tools: string[] // Tool IDs
