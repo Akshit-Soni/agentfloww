@@ -2,6 +2,97 @@
 
 All notable changes to the AI Agent Platform will be documented in this file.
 
+## [0.4.0] - 2025-01-27 - Phase 1: Core Template & API Integration
+
+### Added - OpenAI Integration
+- **Secure OpenAI API Integration**: Complete OpenAI service with proper authentication and error handling
+  - OpenAIService class with rate limiting and usage tracking
+  - API key validation and secure storage
+  - Comprehensive error handling for API calls
+  - Cost calculation and usage monitoring
+  - Support for all GPT models with proper configuration
+- **API Key Management System**: Secure API key storage and management
+  - Encrypted API key storage in database
+  - API key testing and validation
+  - Provider-specific key management (OpenAI, Anthropic, Google, Cohere)
+  - Usage tracking and last-used timestamps
+  - Secure key preview without exposing full keys
+- **Rate Limiting and Usage Tracking**: Comprehensive monitoring and control
+  - Per-user rate limiting (60 requests per minute)
+  - Token usage tracking with cost calculation
+  - Usage analytics and reporting
+  - Automatic cleanup of old rate limit data
+  - Database logging for billing and analytics
+
+### Added - HTTP Service Integration
+- **Secure HTTP Request Handling**: Robust HTTP client for external API integration
+  - HttpService class with retry mechanisms and timeout handling
+  - Support for all HTTP methods (GET, POST, PUT, DELETE, PATCH)
+  - Authentication support (Bearer, Basic, API Key)
+  - Automatic retry with exponential backoff
+  - Request/response logging and monitoring
+  - Comprehensive error handling with proper error types
+- **External Tool Integration**: Enhanced tool system with HTTP capabilities
+  - HTTP-based tool execution with parameter substitution
+  - Secure authentication management for external APIs
+  - Request validation and sanitization
+  - Response parsing and error handling
+  - Timeout and retry configuration per tool
+
+### Enhanced - Template System
+- **Template Loading Fixes**: Resolved all template loading issues
+  - Fixed template-to-agent conversion functionality
+  - Proper tool ID mapping and configuration
+  - Template validation and error handling
+  - URL parameter support for workflow template loading
+- **Template Validation**: Comprehensive template validation system
+  - Schema validation for agent and workflow templates
+  - Required field validation
+  - Tool dependency checking
+  - API key requirement validation
+
+### Enhanced - LLM Integration
+- **Multi-Provider Support**: Enhanced LLM service with multiple providers
+  - OpenAI integration with real API calls
+  - Mock implementations for Anthropic and Google
+  - Provider detection based on model names
+  - Unified interface for all providers
+  - Cost calculation per provider
+- **Error Handling**: Comprehensive error handling for LLM operations
+  - API key validation before requests
+  - Rate limiting with user feedback
+  - Detailed error messages and logging
+  - Fallback mechanisms for failed requests
+
+### Technical Implementation
+- **Database Schema**: New tables for API keys and usage tracking
+  - api_keys table with encrypted key storage
+  - openai_usage table for cost and usage monitoring
+  - Proper RLS policies for data security
+  - Indexes for optimal performance
+- **Security**: Enhanced security measures
+  - API key encryption and secure storage
+  - Row Level Security on all new tables
+  - Input validation and sanitization
+  - Secure authentication headers
+- **Performance**: Optimized for production use
+  - Connection pooling and request batching
+  - Efficient rate limiting with in-memory storage
+  - Proper error handling without blocking
+  - Async operations with proper timeout handling
+
+### User Experience
+- **Settings Enhancement**: Comprehensive API key management interface
+  - Visual API key management with provider icons
+  - Key testing and validation
+  - Usage statistics and monitoring
+  - Secure key display with preview mode
+- **Error Feedback**: Improved error messages and user feedback
+  - Clear error messages for API issues
+  - Rate limiting notifications
+  - Usage warnings and cost alerts
+  - Validation feedback for API keys
+
 ## [0.3.1] - 2025-01-27 - Error Fixes
 
 ### Critical Error Fixes

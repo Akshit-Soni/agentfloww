@@ -2,72 +2,28 @@ import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Badge } from '@/components/ui/Badge'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/components/ui/Toast'
+import { ApiKeyManagement } from '@/components/settings/ApiKeyManagement'
 import { 
   Key, 
   User, 
   Bell, 
   Shield, 
-  Database, 
   Palette,
-  Save,
-  Eye,
-  EyeOff,
-  Plus,
-  Trash2,
-  Edit
+  Save
 } from 'lucide-react'
-
-interface ApiKey {
-  id: string
-  name: string
-  provider: string
-  keyPreview: string
-  isActive: boolean
-  lastUsed?: string
-  createdAt: string
-}
 
 export function Settings() {
   const { user, updateProfile } = useAuthStore()
   const { addToast } = useToast()
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState('api-keys')
   const [isLoading, setIsLoading] = useState(false)
 
   // Profile settings
   const [profileData, setProfileData] = useState({
     name: user?.user_metadata?.name || '',
     email: user?.email || ''
-  })
-
-  // API Keys
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([
-    {
-      id: '1',
-      name: 'OpenAI Production',
-      provider: 'OpenAI',
-      keyPreview: 'sk-...abc123',
-      isActive: true,
-      lastUsed: '2 hours ago',
-      createdAt: '2025-01-20'
-    },
-    {
-      id: '2',
-      name: 'Anthropic Claude',
-      provider: 'Anthropic',
-      keyPreview: 'sk-...def456',
-      isActive: false,
-      createdAt: '2025-01-18'
-    }
-  ])
-
-  const [showAddKeyForm, setShowAddKeyForm] = useState(false)
-  const [newApiKey, setNewApiKey] = useState({
-    name: '',
-    provider: 'OpenAI',
-    key: ''
   })
 
   // Notification settings
@@ -98,54 +54,9 @@ export function Settings() {
     }
   }
 
-  const handleAddApiKey = () => {
-    if (!newApiKey.name || !newApiKey.key) {
-      addToast({
-        type: 'error',
-        title: 'Invalid Input',
-        description: 'Please provide both name and API key.'
-      })
-      return
-    }
-
-    const apiKey: ApiKey = {
-      id: Date.now().toString(),
-      name: newApiKey.name,
-      provider: newApiKey.provider,
-      keyPreview: `${newApiKey.key.slice(0, 3)}...${newApiKey.key.slice(-6)}`,
-      isActive: true,
-      createdAt: new Date().toISOString().split('T')[0]
-    }
-
-    setApiKeys(prev => [...prev, apiKey])
-    setNewApiKey({ name: '', provider: 'OpenAI', key: '' })
-    setShowAddKeyForm(false)
-    
-    addToast({
-      type: 'success',
-      title: 'API Key Added',
-      description: 'Your API key has been added successfully.'
-    })
-  }
-
-  const handleDeleteApiKey = (id: string) => {
-    setApiKeys(prev => prev.filter(key => key.id !== id))
-    addToast({
-      type: 'success',
-      title: 'API Key Deleted',
-      description: 'API key has been removed.'
-    })
-  }
-
-  const toggleApiKey = (id: string) => {
-    setApiKeys(prev => prev.map(key => 
-      key.id === id ? { ...key, isActive: !key.isActive } : key
-    ))
-  }
-
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
     { id: 'api-keys', label: 'API Keys', icon: Key },
+    { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'preferences', label: 'Preferences', icon: Palette }
@@ -184,6 +95,9 @@ export function Settings() {
 
         {/* Content */}
         <div className="flex-1 space-y-6">
+          {/* API Keys */}
+          {activeTab === 'api-keys' && <ApiKeyManagement />}
+
           {/* Profile Settings */}
           {activeTab === 'profile' && (
             <Card>
@@ -223,108 +137,6 @@ export function Settings() {
                 </Button>
               </CardContent>
             </Card>
-          )}
-
-          {/* API Keys */}
-          {activeTab === 'api-keys' && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>API Keys</CardTitle>
-                    <CardDescription>
-                      Manage your API keys for different AI providers
-                    </CardDescription>
-                  </div>
-                  <Button onClick={() => setShowAddKeyForm(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Key
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {showAddKeyForm && (
-                    <div className="mb-6 p-4 border border-border rounded-lg bg-muted/50">
-                      <h4 className="font-medium mb-3">Add New API Key</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <Input
-                          placeholder="Key name"
-                          value={newApiKey.name}
-                          onChange={(e) => setNewApiKey(prev => ({ ...prev, name: e.target.value }))}
-                        />
-                        <select
-                          value={newApiKey.provider}
-                          onChange={(e) => setNewApiKey(prev => ({ ...prev, provider: e.target.value }))}
-                          className="px-3 py-2 border border-input rounded-md bg-background text-sm"
-                        >
-                          <option value="OpenAI">OpenAI</option>
-                          <option value="Anthropic">Anthropic</option>
-                          <option value="Google">Google</option>
-                          <option value="Cohere">Cohere</option>
-                        </select>
-                        <Input
-                          placeholder="API key"
-                          type="password"
-                          value={newApiKey.key}
-                          onChange={(e) => setNewApiKey(prev => ({ ...prev, key: e.target.value }))}
-                        />
-                      </div>
-                      <div className="flex items-center space-x-2 mt-3">
-                        <Button size="sm" onClick={handleAddApiKey}>
-                          Add Key
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setShowAddKeyForm(false)}>
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="space-y-3">
-                    {apiKeys.map((apiKey) => (
-                      <div key={apiKey.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-2 h-2 rounded-full ${apiKey.isActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                          <div>
-                            <h4 className="font-medium">{apiKey.name}</h4>
-                            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                              <span>{apiKey.provider}</span>
-                              <span>•</span>
-                              <span>{apiKey.keyPreview}</span>
-                              {apiKey.lastUsed && (
-                                <>
-                                  <span>•</span>
-                                  <span>Used {apiKey.lastUsed}</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant={apiKey.isActive ? 'default' : 'secondary'}>
-                            {apiKey.isActive ? 'Active' : 'Inactive'}
-                          </Badge>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => toggleApiKey(apiKey.id)}
-                          >
-                            {apiKey.isActive ? 'Disable' : 'Enable'}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteApiKey(apiKey.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           )}
 
           {/* Notifications */}

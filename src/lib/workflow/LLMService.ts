@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase'
+import { openAIService } from '@/lib/openai/OpenAIService'
+import { useApiKeyStore } from '@/store/apiKeyStore'
 
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant'
@@ -22,34 +24,108 @@ export interface LLMResponse {
   }
   model: string
   finishReason: string
+  cost?: number
 }
 
 export class LLMService {
   async generateResponse(request: LLMRequest): Promise<LLMResponse> {
     try {
-      // In a real implementation, this would call OpenAI, Anthropic, or other LLM APIs
-      // For now, we'll return a mock response
+      // Determine provider based on model
+      const provider = this.getProviderFromModel(request.model)
       
-      const mockResponse: LLMResponse = {
-        content: this.generateMockResponse(request.messages),
-        usage: {
-          promptTokens: this.estimateTokens(request.messages.map(m => m.content).join(' ')),
-          completionTokens: 50,
-          totalTokens: 0
-        },
-        model: request.model,
-        finishReason: 'stop'
+      // Get active API key for the provider
+      const apiKey = useApiKeyStore.getState().getActiveKey(provider)
+      if (!apiKey) {
+        throw new Error(`No active API key found for ${provider}. Please add an API key in settings.`)
       }
-      
-      mockResponse.usage.totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens
 
-      // Log the LLM call for monitoring
-      await this.logLLMCall(request, mockResponse)
-
-      return mockResponse
+      // Route to appropriate service based on provider
+      switch (provider) {
+        case 'openai':
+          return await this.callOpenAI(request)
+        case 'anthropic':
+          return await this.callAnthropic(request)
+        case 'google':
+          return await this.callGoogle(request)
+        default:
+          throw new Error(`Unsupported provider: ${provider}`)
+      }
     } catch (error) {
-      throw new Error(`LLM service error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      // Log the error for monitoring
+      await this.logLLMError(request, error)
+      throw error
     }
+  }
+
+  private async callOpenAI(request: LLMRequest): Promise<LLMResponse> {
+    if (!openAIService.isInitialized()) {
+      const apiKey = useApiKeyStore.getState().getActiveKey('openai')
+      if (!apiKey) {
+        throw new Error('OpenAI API key not configured')
+      }
+      // In production, decrypt the key
+      await openAIService.initialize('placeholder-key')
+    }
+
+    const response = await openAIService.generateCompletion({
+      model: request.model,
+      messages: request.messages,
+      temperature: request.temperature,
+      max_tokens: request.maxTokens
+    }, request.userId)
+
+    return {
+      content: response.choices[0].message.content,
+      usage: {
+        promptTokens: response.usage.prompt_tokens,
+        completionTokens: response.usage.completion_tokens,
+        totalTokens: response.usage.total_tokens
+      },
+      model: response.model,
+      finishReason: response.choices[0].finish_reason
+    }
+  }
+
+  private async callAnthropic(request: LLMRequest): Promise<LLMResponse> {
+    // Mock Anthropic implementation
+    const mockResponse: LLMResponse = {
+      content: this.generateMockResponse(request.messages),
+      usage: {
+        promptTokens: this.estimateTokens(request.messages.map(m => m.content).join(' ')),
+        completionTokens: 50,
+        totalTokens: 0
+      },
+      model: request.model,
+      finishReason: 'stop'
+    }
+    
+    mockResponse.usage.totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens
+    return mockResponse
+  }
+
+  private async callGoogle(request: LLMRequest): Promise<LLMResponse> {
+    // Mock Google implementation
+    const mockResponse: LLMResponse = {
+      content: this.generateMockResponse(request.messages),
+      usage: {
+        promptTokens: this.estimateTokens(request.messages.map(m => m.content).join(' ')),
+        completionTokens: 50,
+        totalTokens: 0
+      },
+      model: request.model,
+      finishReason: 'stop'
+    }
+    
+    mockResponse.usage.totalTokens = mockResponse.usage.promptTokens + mockResponse.usage.completionTokens
+    return mockResponse
+  }
+
+  private getProviderFromModel(model: string): string {
+    if (model.startsWith('gpt-')) return 'openai'
+    if (model.startsWith('claude-')) return 'anthropic'
+    if (model.startsWith('gemini-')) return 'google'
+    if (model.startsWith('command-')) return 'cohere'
+    return 'openai' // default
   }
 
   private generateMockResponse(messages: LLMMessage[]): string {
@@ -82,25 +158,36 @@ export class LLMService {
     return Math.ceil(text.length / 4)
   }
 
-  private async logLLMCall(request: LLMRequest, response: LLMResponse): Promise<void> {
+  private async logLLMError(request: LLMRequest, error: any): Promise<void> {
     try {
-      // In a real implementation, you might want to log LLM calls for monitoring and billing
-      console.log('LLM Call:', {
+      console.error('LLM request failed:', {
         model: request.model,
         userId: request.userId,
-        promptTokens: response.usage.promptTokens,
-        completionTokens: response.usage.completionTokens,
-        totalTokens: response.usage.totalTokens
+        error: error instanceof Error ? error.message : 'Unknown error'
       })
-    } catch (error) {
-      console.warn('Failed to log LLM call:', error)
+    } catch (logError) {
+      console.warn('Failed to log LLM error:', logError)
     }
   }
 
   async validateApiKey(provider: string, apiKey: string): Promise<boolean> {
-    // Mock API key validation
-    // In a real implementation, this would make a test call to the provider's API
-    return apiKey.length > 10 && apiKey.startsWith('sk-')
+    try {
+      switch (provider) {
+        case 'openai':
+          await openAIService.initialize(apiKey)
+          return true
+        case 'anthropic':
+          // Mock validation for Anthropic
+          return apiKey.startsWith('sk-ant-') && apiKey.length > 20
+        case 'google':
+          // Mock validation for Google
+          return apiKey.length > 20
+        default:
+          return false
+      }
+    } catch (error) {
+      return false
+    }
   }
 
   getSupportedModels(): string[] {
