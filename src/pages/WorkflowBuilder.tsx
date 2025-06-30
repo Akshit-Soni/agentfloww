@@ -23,6 +23,7 @@ import { CustomNodes } from '@/components/workflow/nodes'
 import { useAgentStore } from '@/store/agentStore'
 import { useTemplateStore } from '@/store/templateStore'
 import { useToast } from '@/components/ui/Toast'
+import { WorkflowNode } from '@/types/agent'
 
 const nodeTypes = CustomNodes
 
@@ -158,7 +159,7 @@ export function WorkflowBuilder() {
   const handleSave = useCallback(async () => {
     if (currentAgent) {
       const workflow = {
-        nodes,
+        nodes: nodes as WorkflowNode[],
         edges,
         settings: currentAgent.workflow.settings
       }
@@ -195,7 +196,7 @@ export function WorkflowBuilder() {
     if (currentAgentState && (nodes.length > 1 || edges.length > 0)) {
       const timeoutId = setTimeout(() => {
         const workflow = {
-          nodes,
+          nodes: nodes as WorkflowNode[],
           edges,
           settings: currentAgentState.workflow.settings
         }
@@ -254,7 +255,7 @@ export function WorkflowBuilder() {
       {isChatOpen && (
         <ChatPanel
           onClose={() => setIsChatOpen(false)}
-          workflow={{ nodes, edges }}
+          workflow={{ nodes: nodes as WorkflowNode[], edges }}
         />
       )}
 

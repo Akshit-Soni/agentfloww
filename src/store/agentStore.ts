@@ -7,7 +7,7 @@ export interface Agent {
   user_id: string
   name: string
   description?: string
-  type: 'llm' | 'hybrid' | 'rule-based'
+  type: 'llm' | 'hybrid' | 'rule-based' | 'event'
   status: 'draft' | 'active' | 'inactive' | 'deployed'
   workflow: WorkflowDefinition
   deployed_url?: string
