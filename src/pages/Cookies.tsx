@@ -8,7 +8,8 @@ import {
   Globe,
   Calendar,
   Mail,
-  AlertCircle
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react'
 
 export function Cookies() {
