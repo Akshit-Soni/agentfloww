@@ -165,13 +165,21 @@ export function WorkflowBuilder() {
       updateWorkflow(workflow)
       
       // Save to database
-      await updateAgent(currentAgent.id, { workflow })
-      
-      addToast({
-        type: 'success',
-        title: 'Workflow Saved',
-        description: 'Your workflow has been saved successfully.'
-      })
+      try {
+        await updateAgent(currentAgent.id, { workflow })
+        
+        addToast({
+          type: 'success',
+          title: 'Workflow Saved',
+          description: 'Your workflow has been saved successfully.'
+        })
+      } catch (error) {
+        addToast({
+          type: 'error',
+          title: 'Save Failed',
+          description: error instanceof Error ? error.message : 'Failed to save workflow'
+        })
+      }
     } else {
       addToast({
         type: 'info',
@@ -181,16 +189,20 @@ export function WorkflowBuilder() {
     }
   }, [nodes, edges, currentAgent, updateWorkflow, updateAgent, addToast])
 
-  // Auto-save workflow changes
+  // Auto-save workflow changes with debouncing
   useEffect(() => {
     const currentAgentState = useAgentStore.getState().currentAgent
-    if (currentAgentState) {
-      const workflow = {
-        nodes,
-        edges,
-        settings: currentAgentState.workflow.settings
-      }
-      updateWorkflow(workflow)
+    if (currentAgentState && (nodes.length > 1 || edges.length > 0)) {
+      const timeoutId = setTimeout(() => {
+        const workflow = {
+          nodes,
+          edges,
+          settings: currentAgentState.workflow.settings
+        }
+        updateWorkflow(workflow)
+      }, 1000) // Debounce for 1 second
+
+      return () => clearTimeout(timeoutId)
     }
   }, [nodes, edges, updateWorkflow])
 

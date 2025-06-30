@@ -33,11 +33,16 @@ export class HttpService {
   private readonly DEFAULT_TIMEOUT = 30000
   private readonly DEFAULT_RETRIES = 3
   private readonly DEFAULT_RETRY_DELAY = 1000
+  private readonly MAX_URL_LENGTH = 2048
+  private readonly ALLOWED_PROTOCOLS = ['http:', 'https:']
 
   async makeRequest(config: HttpRequestConfig): Promise<HttpResponse> {
     const startTime = Date.now()
     const maxRetries = config.retries ?? this.DEFAULT_RETRIES
     let lastError: HttpError | null = null
+
+    // Validate and sanitize URL
+    this.validateAndSanitizeUrl(config.url)
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -51,7 +56,7 @@ export class HttpService {
           break
         }
 
-        // Wait before retrying
+        // Wait before retrying with exponential backoff
         const delay = (config.retryDelay ?? this.DEFAULT_RETRY_DELAY) * Math.pow(2, attempt)
         await this.sleep(delay)
         
@@ -62,15 +67,61 @@ export class HttpService {
     throw lastError || new Error('HTTP request failed after all retries')
   }
 
+  private validateAndSanitizeUrl(url: string): void {
+    if (!url || typeof url !== 'string') {
+      throw new Error('URL must be a non-empty string')
+    }
+
+    if (url.length > this.MAX_URL_LENGTH) {
+      throw new Error(`URL exceeds maximum length of ${this.MAX_URL_LENGTH} characters`)
+    }
+
+    let parsedUrl: URL
+    try {
+      parsedUrl = new URL(url)
+    } catch {
+      throw new Error(`Invalid URL format: ${url}`)
+    }
+
+    if (!this.ALLOWED_PROTOCOLS.includes(parsedUrl.protocol)) {
+      throw new Error(`Protocol ${parsedUrl.protocol} is not allowed`)
+    }
+
+    // Prevent SSRF attacks
+    if (this.isPrivateIP(parsedUrl.hostname)) {
+      throw new Error('Requests to private IP addresses are not allowed')
+    }
+  }
+
+  private isPrivateIP(hostname: string): boolean {
+    // Check for localhost
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+      return true
+    }
+
+    // Check for private IP ranges
+    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/
+    const match = hostname.match(ipv4Regex)
+    
+    if (match) {
+      const [, a, b, c, d] = match.map(Number)
+      
+      // Private IP ranges
+      return (
+        (a === 10) ||
+        (a === 172 && b >= 16 && b <= 31) ||
+        (a === 192 && b === 168) ||
+        (a === 169 && b === 254) // Link-local
+      )
+    }
+
+    return false
+  }
+
   private async executeRequest(config: HttpRequestConfig, startTime: number): Promise<HttpResponse> {
     const { url, method, headers = {}, body, timeout = this.DEFAULT_TIMEOUT } = config
 
-    // Validate URL
-    if (!this.isValidUrl(url)) {
-      throw new Error(`Invalid URL: ${url}`)
-    }
-
-    // Prepare headers
+    // Prepare headers with security considerations
     const requestHeaders = { ...headers }
     
     // Add authentication headers
@@ -83,6 +134,9 @@ export class HttpService {
       requestHeaders['Content-Type'] = 'application/json'
     }
 
+    // Security headers
+    requestHeaders['User-Agent'] = 'AI-Agent-Platform/1.0'
+
     // Create abort controller for timeout
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeout)
@@ -94,9 +148,17 @@ export class HttpService {
         signal: controller.signal
       }
 
-      // Add body for non-GET requests
+      // Add body for non-GET requests with validation
       if (body && method !== 'GET') {
-        requestOptions.body = typeof body === 'string' ? body : JSON.stringify(body)
+        if (typeof body === 'string') {
+          requestOptions.body = body
+        } else {
+          try {
+            requestOptions.body = JSON.stringify(body)
+          } catch (error) {
+            throw new Error('Failed to serialize request body')
+          }
+        }
       }
 
       const response = await fetch(url, requestOptions)
@@ -187,15 +249,6 @@ export class HttpService {
       result[key] = value
     })
     return result
-  }
-
-  private isValidUrl(url: string): boolean {
-    try {
-      new URL(url)
-      return true
-    } catch {
-      return false
-    }
   }
 
   private shouldNotRetry(error: HttpError): boolean {

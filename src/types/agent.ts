@@ -45,3 +45,31 @@ export interface AgentDeployment {
   deployedAt?: string
   version?: string
 }
+
+export interface ExecutionContext {
+  executionId: string
+  agentId: string
+  userId: string
+  input: any
+  variables: Record<string, any>
+  currentNodeId: string
+}
+
+export interface ExecutionResult {
+  success: boolean
+  output: any
+  error?: string
+  executionTime: number
+  steps: ExecutionStep[]
+}
+
+export interface ExecutionStep {
+  nodeId: string
+  nodeType: string
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  input: any
+  output: any
+  error?: string
+  startTime: number
+  endTime?: number
+}

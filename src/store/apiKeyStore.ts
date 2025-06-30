@@ -68,18 +68,18 @@ export const useApiKeyStore = create<ApiKeyStore>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // Validate the API key based on provider
+      // Enhanced validation
       await get().validateApiKey(provider, key)
 
-      // Hash the key for storage (in production, use proper encryption)
+      // Secure key hashing with salt
       const keyHash = await get().hashApiKey(key)
-      const keyPreview = `${key.slice(0, 3)}...${key.slice(-4)}`
+      const keyPreview = get().createKeyPreview(key)
 
       const { data, error } = await supabase
         .from('api_keys')
         .insert({
           user_id: user.id,
-          name,
+          name: name.trim(),
           provider,
           key_hash: keyHash,
           key_preview: keyPreview,
@@ -125,7 +125,7 @@ export const useApiKeyStore = create<ApiKeyStore>((set, get) => ({
       const { data, error } = await supabase
         .from('api_keys')
         .update({
-          name: updates.name,
+          name: updates.name?.trim(),
           is_active: updates.isActive,
           last_used: updates.lastUsed ? new Date(updates.lastUsed).toISOString() : undefined
         })
@@ -214,29 +214,69 @@ export const useApiKeyStore = create<ApiKeyStore>((set, get) => ({
     return apiKeys.find(key => key.provider === provider && key.isActive) || null
   },
 
-  // Helper methods (these would be private in a class)
+  // Enhanced security methods
   validateApiKey: async (provider: string, key: string): Promise<boolean> => {
+    // Input sanitization
+    if (!key || typeof key !== 'string') {
+      throw new Error('Invalid API key format')
+    }
+
+    const sanitizedKey = key.trim()
+    
     switch (provider) {
       case 'openai':
-        return key.startsWith('sk-') && key.length > 20
+        return sanitizedKey.startsWith('sk-') && sanitizedKey.length >= 51 && sanitizedKey.length <= 64
       case 'anthropic':
-        return key.startsWith('sk-ant-') && key.length > 20
+        return sanitizedKey.startsWith('sk-ant-') && sanitizedKey.length >= 40
       case 'google':
-        return key.length > 20
+        return sanitizedKey.length >= 32 && sanitizedKey.length <= 128
       case 'cohere':
-        return key.length > 20
+        return sanitizedKey.length >= 32 && sanitizedKey.length <= 128
       default:
-        return false
+        throw new Error(`Unsupported provider: ${provider}`)
     }
   },
 
   hashApiKey: async (key: string): Promise<string> => {
-    // In production, use proper encryption/hashing
-    // For now, we'll use a simple hash
+    // Generate random salt
+    const salt = crypto.getRandomValues(new Uint8Array(16))
+    
+    // Use PBKDF2 for secure hashing
     const encoder = new TextEncoder()
-    const data = encoder.encode(key)
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    const keyData = encoder.encode(key)
+    
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    )
+    
+    const hashBuffer = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: 100000,
+        hash: 'SHA-256'
+      },
+      cryptoKey,
+      256
+    )
+    
+    // Combine salt and hash
+    const combined = new Uint8Array(salt.length + hashBuffer.byteLength)
+    combined.set(salt)
+    combined.set(new Uint8Array(hashBuffer), salt.length)
+    
+    // Convert to hex string
+    return Array.from(combined)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+  },
+
+  createKeyPreview: (key: string): string => {
+    if (key.length < 8) return key
+    return `${key.slice(0, 4)}...${key.slice(-4)}`
   }
 }))

@@ -1,39 +1,12 @@
 import { supabase } from '@/lib/supabase'
 import { LLMService } from './LLMService'
 import { ToolService } from './ToolService'
-import { WorkflowDefinition, WorkflowNode, WorkflowEdge } from '@/types/agent'
-
-export interface ExecutionContext {
-  executionId: string
-  agentId: string
-  userId: string
-  input: any
-  variables: Record<string, any>
-  currentNodeId: string
-}
-
-export interface ExecutionResult {
-  success: boolean
-  output: any
-  error?: string
-  executionTime: number
-  steps: ExecutionStep[]
-}
-
-export interface ExecutionStep {
-  nodeId: string
-  nodeType: string
-  status: 'pending' | 'running' | 'completed' | 'failed'
-  input: any
-  output: any
-  error?: string
-  startTime: number
-  endTime?: number
-}
+import { WorkflowDefinition, WorkflowNode, WorkflowEdge, ExecutionContext, ExecutionResult, ExecutionStep } from '@/types/agent'
 
 export class WorkflowEngine {
   private llmService: LLMService
   private toolService: ToolService
+  private executionLocks: Map<string, boolean> = new Map()
 
   constructor() {
     this.llmService = new LLMService()
@@ -49,6 +22,14 @@ export class WorkflowEngine {
     const startTime = Date.now()
     const executionId = crypto.randomUUID()
     const steps: ExecutionStep[] = []
+
+    // Prevent concurrent executions for the same agent
+    const lockKey = `${agentId}-${userId}`
+    if (this.executionLocks.get(lockKey)) {
+      throw new Error('Another execution is already in progress for this agent')
+    }
+
+    this.executionLocks.set(lockKey, true)
 
     try {
       // Create execution record
@@ -109,6 +90,9 @@ export class WorkflowEngine {
         executionTime,
         steps
       }
+    } finally {
+      // Release execution lock
+      this.executionLocks.delete(lockKey)
     }
   }
 
@@ -220,7 +204,7 @@ export class WorkflowEngine {
   }
 
   private async executeLLMNode(node: WorkflowNode, context: ExecutionContext) {
-    const config = node.data.config
+    const config = node.data.config || {}
     const model = config.model || 'gpt-3.5-turbo'
     const systemPrompt = config.systemPrompt || 'You are a helpful assistant.'
     const temperature = config.temperature || 0.7
@@ -242,7 +226,7 @@ export class WorkflowEngine {
   }
 
   private async executeToolNode(node: WorkflowNode, context: ExecutionContext) {
-    const config = node.data.config
+    const config = node.data.config || {}
     const toolId = config.toolId
     
     if (!toolId) {
@@ -268,7 +252,7 @@ export class WorkflowEngine {
   }
 
   private async executeRuleNode(node: WorkflowNode, context: ExecutionContext) {
-    const config = node.data.config
+    const config = node.data.config || {}
     const condition = config.condition || 'true'
     const action = config.action || 'continue'
 
@@ -298,7 +282,7 @@ export class WorkflowEngine {
   }
 
   private async executeConnectorNode(node: WorkflowNode, context: ExecutionContext) {
-    const config = node.data.config
+    const config = node.data.config || {}
     const connectorType = config.type || 'webhook'
     const action = config.action || 'send'
 
@@ -326,64 +310,80 @@ export class WorkflowEngine {
   }
 
   private async createExecutionRecord(executionId: string, agentId: string, userId: string, input: any) {
-    const { error } = await supabase
-      .from('workflow_executions')
-      .insert({
-        id: executionId,
-        agent_id: agentId,
-        user_id: userId,
-        status: 'running',
-        input_data: input,
-        started_at: new Date().toISOString()
-      })
+    try {
+      const { error } = await supabase
+        .from('workflow_executions')
+        .insert({
+          id: executionId,
+          agent_id: agentId,
+          user_id: userId,
+          status: 'running',
+          input_data: input,
+          started_at: new Date().toISOString()
+        })
 
-    if (error) {
+      if (error) {
+        console.error('Failed to create execution record:', error)
+      }
+    } catch (error) {
       console.error('Failed to create execution record:', error)
     }
   }
 
   private async updateExecutionRecord(executionId: string, updates: any) {
-    const { error } = await supabase
-      .from('workflow_executions')
-      .update(updates)
-      .eq('id', executionId)
+    try {
+      const { error } = await supabase
+        .from('workflow_executions')
+        .update(updates)
+        .eq('id', executionId)
 
-    if (error) {
+      if (error) {
+        console.error('Failed to update execution record:', error)
+      }
+    } catch (error) {
       console.error('Failed to update execution record:', error)
     }
   }
 
   private async createStepRecord(executionId: string, step: ExecutionStep) {
-    const { error } = await supabase
-      .from('workflow_execution_steps')
-      .insert({
-        execution_id: executionId,
-        node_id: step.nodeId,
-        node_type: step.nodeType,
-        status: step.status,
-        input_data: step.input,
-        started_at: new Date(step.startTime).toISOString()
-      })
+    try {
+      const { error } = await supabase
+        .from('workflow_execution_steps')
+        .insert({
+          execution_id: executionId,
+          node_id: step.nodeId,
+          node_type: step.nodeType,
+          status: step.status,
+          input_data: step.input,
+          started_at: new Date(step.startTime).toISOString()
+        })
 
-    if (error) {
+      if (error) {
+        console.error('Failed to create step record:', error)
+      }
+    } catch (error) {
       console.error('Failed to create step record:', error)
     }
   }
 
   private async updateStepRecord(executionId: string, step: ExecutionStep) {
-    const { error } = await supabase
-      .from('workflow_execution_steps')
-      .update({
-        status: step.status,
-        output_data: step.output,
-        error_message: step.error,
-        execution_time_ms: step.endTime ? step.endTime - step.startTime : null,
-        completed_at: step.endTime ? new Date(step.endTime).toISOString() : null
-      })
-      .eq('execution_id', executionId)
-      .eq('node_id', step.nodeId)
+    try {
+      const { error } = await supabase
+        .from('workflow_execution_steps')
+        .update({
+          status: step.status,
+          output_data: step.output,
+          error_message: step.error,
+          execution_time_ms: step.endTime ? step.endTime - step.startTime : null,
+          completed_at: step.endTime ? new Date(step.endTime).toISOString() : null
+        })
+        .eq('execution_id', executionId)
+        .eq('node_id', step.nodeId)
 
-    if (error) {
+      if (error) {
+        console.error('Failed to update step record:', error)
+      }
+    } catch (error) {
       console.error('Failed to update step record:', error)
     }
   }
