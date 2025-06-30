@@ -15,6 +15,7 @@ interface AuthStore {
   resetPassword: (email: string) => Promise<void>
   updateProfile: (updates: { name?: string; email?: string }) => Promise<void>
   initialize: () => Promise<void>
+  clearError: () => void
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -22,6 +23,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   session: null,
   isLoading: true,
   error: null,
+
+  clearError: () => set({ error: null }),
 
   signUp: async (email: string, password: string, name?: string) => {
     set({ isLoading: true, error: null })
@@ -34,6 +37,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         throw new Error('Password must be at least 6 characters long')
       }
 
+      console.log('Attempting to sign up user:', email)
+
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
@@ -44,7 +49,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         }
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Sign up error:', error)
+        throw error
+      }
+
+      console.log('Sign up successful:', data.user?.id)
 
       // If user is created, ensure user record exists in users table
       if (data.user) {
@@ -72,11 +82,21 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       set({ isLoading: false })
     } catch (error) {
+      console.error('Sign up failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to sign up'
-      set({ 
-        error: errorMessage,
-        isLoading: false 
-      })
+      
+      // Handle network errors specifically
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        set({ 
+          error: 'Unable to connect to the server. Please check your internet connection and try again.',
+          isLoading: false 
+        })
+      } else {
+        set({ 
+          error: errorMessage,
+          isLoading: false 
+        })
+      }
       throw new Error(errorMessage)
     }
   },
@@ -92,18 +112,23 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         throw new Error('Password is required')
       }
 
+      console.log('Attempting to sign in user:', email)
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password
       })
 
       if (error) {
+        console.error('Sign in error:', error)
         // Provide user-friendly error messages
         if (error.message.includes('Invalid login credentials')) {
           throw new Error('Invalid email or password')
         }
         throw error
       }
+
+      console.log('Sign in successful:', data.user?.id)
 
       // Ensure user record exists in users table after successful sign in
       if (data.user) {
@@ -136,11 +161,21 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         error: null
       })
     } catch (error) {
+      console.error('Sign in failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to sign in'
-      set({ 
-        error: errorMessage,
-        isLoading: false 
-      })
+      
+      // Handle network errors specifically
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        set({ 
+          error: 'Unable to connect to the server. Please check your internet connection and try again.',
+          isLoading: false 
+        })
+      } else {
+        set({ 
+          error: errorMessage,
+          isLoading: false 
+        })
+      }
       throw new Error(errorMessage)
     }
   },
@@ -148,9 +183,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   signOut: async () => {
     set({ isLoading: true, error: null })
     try {
+      console.log('Attempting to sign out user')
       const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      if (error) {
+        console.error('Sign out error:', error)
+        throw error
+      }
 
+      console.log('Sign out successful')
       set({ 
         user: null,
         session: null,
@@ -158,6 +198,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         error: null
       })
     } catch (error) {
+      console.error('Sign out failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to sign out'
       set({ 
         error: errorMessage,
@@ -174,18 +215,35 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         throw new Error('Please provide a valid email address')
       }
 
+      console.log('Attempting to reset password for:', email)
+
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
         redirectTo: `${window.location.origin}/reset-password`
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Reset password error:', error)
+        throw error
+      }
+
+      console.log('Reset password email sent successfully')
       set({ isLoading: false, error: null })
     } catch (error) {
+      console.error('Reset password failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to send reset email'
-      set({ 
-        error: errorMessage,
-        isLoading: false 
-      })
+      
+      // Handle network errors specifically
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        set({ 
+          error: 'Unable to connect to the server. Please check your internet connection and try again.',
+          isLoading: false 
+        })
+      } else {
+        set({ 
+          error: errorMessage,
+          isLoading: false 
+        })
+      }
       throw new Error(errorMessage)
     }
   },
@@ -201,12 +259,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         throw new Error('Please provide a valid email address')
       }
 
+      console.log('Attempting to update profile for user:', user.id)
+
       // Update auth profile if email is being changed
       if (updates.email) {
         const { error: authError } = await supabase.auth.updateUser({
           email: updates.email.trim().toLowerCase()
         })
-        if (authError) throw authError
+        if (authError) {
+          console.error('Auth update error:', authError)
+          throw authError
+        }
       }
 
       // Update user profile in database
@@ -219,25 +282,55 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           })
           .eq('id', user.id)
 
-        if (profileError) throw profileError
+        if (profileError) {
+          console.error('Profile update error:', profileError)
+          throw profileError
+        }
       }
 
+      console.log('Profile update successful')
       set({ isLoading: false, error: null })
     } catch (error) {
+      console.error('Profile update failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to update profile'
-      set({ 
-        error: errorMessage,
-        isLoading: false 
-      })
+      
+      // Handle network errors specifically
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        set({ 
+          error: 'Unable to connect to the server. Please check your internet connection and try again.',
+          isLoading: false 
+        })
+      } else {
+        set({ 
+          error: errorMessage,
+          isLoading: false 
+        })
+      }
       throw new Error(errorMessage)
     }
   },
 
   initialize: async () => {
     try {
-      // Get initial session
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) throw error
+      console.log('Initializing auth store...')
+      
+      // Get initial session with timeout
+      const sessionPromise = supabase.auth.getSession()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout')), 10000)
+      )
+
+      const { data: { session }, error } = await Promise.race([
+        sessionPromise,
+        timeoutPromise
+      ]) as any
+
+      if (error) {
+        console.error('Get session error:', error)
+        throw error
+      }
+
+      console.log('Session retrieved:', !!session)
 
       // If we have a session, ensure user record exists in users table
       if (session?.user) {
@@ -272,6 +365,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       // Listen for auth changes
       supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth state changed:', event, !!session)
+        
         // Sync user data when auth state changes
         if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
           try {
@@ -303,12 +398,24 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           error: null
         })
       })
+
+      console.log('Auth store initialized successfully')
     } catch (error) {
+      console.error('Auth initialization failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize auth'
-      set({ 
-        error: errorMessage,
-        isLoading: false 
-      })
+      
+      // Handle network errors specifically
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError') || errorMessage.includes('Connection timeout')) {
+        set({ 
+          error: 'Unable to connect to the authentication server. Please check your internet connection and try again.',
+          isLoading: false 
+        })
+      } else {
+        set({ 
+          error: errorMessage,
+          isLoading: false 
+        })
+      }
     }
   }
 }))
