@@ -20,11 +20,11 @@ export function About() {
 
   const team = [
     {
-      name: 'Alex Chen',
+      name: 'Akshit Soni',
       role: 'CEO & Co-Founder',
-      bio: 'Former AI researcher at Google with 10+ years in machine learning and enterprise software.',
+      bio: 'Gen AI enthusiast and Learner',
       avatar: '👨‍💼',
-      linkedin: '#'
+      linkedin: 'https://www.linkedin.com/in/akshit-soni-627745232/'
     },
     {
       name: 'Sarah Rodriguez',
